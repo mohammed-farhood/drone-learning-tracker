@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Drone Learning Tracker — 28-Day Program</title>
+<meta name="description" content="Track your team's 28-day drone learning curriculum. Log daily progress, share resources, and monitor team performance.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --color-bg-primary: #ffffff;
+  --color-bg-secondary: #f5f4f0;
+  --color-bg-tertiary: #eeece6;
+  --color-text-primary: #1a1a18;
+  --color-text-secondary: #5f5e5a;
+  --color-text-tertiary: #9c9a92;
+  --color-border: rgba(0,0,0,0.12);
+  --color-border-strong: rgba(0,0,0,0.25);
+  --blue-bg: #e6f1fb; --blue-text: #185fa5; --blue-border: #378add;
+  --green-bg: #eaf3de; --green-text: #3b6d11; --green-border: #639922;
+  --red-bg: #fcebeb; --red-text: #a32d2d; --red-border: #e24b4a;
+  --amber-bg: #faeeda; --amber-text: #854f0b; --amber-border: #ba7517;
+  --purple-bg: #eeedfe; --purple-text: #534ab7; --purple-border: #7f77dd;
+  --radius-sm: 6px; --radius-md: 8px; --radius-lg: 12px; --radius-pill: 999px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 15px; line-height: 1.6; }
+body { font-family: 'Inter', -apple-system, sans-serif; font-weight: 400; color: var(--color-text-primary); background: var(--color-bg-secondary); min-height: 100vh; display: flex; flex-direction: column; }
+h1, h2, h3, h4 { font-weight: 500; }
+h1 { font-size: 1.5rem; } h2 { font-size: 1.2rem; } h3 { font-size: 1.05rem; }
+a { color: var(--blue-text); text-decoration: none; }
+a:hover { text-decoration: underline; }
+input, textarea, select, button { font-family: inherit; font-size: 13px; }
+input[type="text"], input[type="password"], input[type="url"], textarea, select {
+  border: 0.5px solid var(--color-border-strong); border-radius: var(--radius-md); padding: 7px 12px;
+  background: var(--color-bg-primary); color: var(--color-text-primary); width: 100%;
+}
+input:focus, textarea:focus, select:focus { outline: 2px solid var(--blue-border); outline-offset: -1px; }
+textarea { resize: vertical; min-height: 60px; }
+button { cursor: pointer; border: 0.5px solid var(--color-border-strong); border-radius: var(--radius-md);
+  padding: 6px 14px; font-size: 13px; font-weight: 500; background: transparent; color: var(--color-text-primary); transition: background 0.15s; }
+button:hover { background: var(--color-bg-secondary); }
+.btn-primary { background: var(--blue-bg); color: var(--blue-text); border-color: var(--blue-border); }
+.btn-primary:hover { background: #d4e8f7; }
+.btn-danger { background: var(--red-bg); color: var(--red-text); border-color: var(--red-border); }
+.btn-danger:hover { background: #f5d5d5; }
+.btn-sm { padding: 4px 10px; font-size: 12px; }
+
+/* Layout */
+#app { flex: 1; display: flex; flex-direction: column; }
+.top-nav { display: flex; align-items: center; justify-content: space-between; padding: 10px 20px;
+  background: var(--color-bg-primary); border-bottom: 0.5px solid var(--color-border); position: sticky; top: 0; z-index: 100; }
+.top-nav .logo { font-weight: 500; font-size: 15px; color: var(--color-text-primary); display: flex; align-items: center; gap: 8px; }
+.top-nav .logo svg { width: 20px; height: 20px; }
+.top-nav .user-info { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--color-text-secondary); }
+.main-content { flex: 1; max-width: 900px; width: 100%; margin: 0 auto; padding: 24px 20px 60px; }
+.app-footer { padding: 10px 20px; background: var(--color-bg-secondary); border-top: 0.5px solid var(--color-border);
+  font-size: 12px; color: var(--color-text-tertiary); display: flex; justify-content: space-between; align-items: center; }
+
+/* Views */
+.view { display: none; animation: fadeIn 0.2s ease; }
+.view.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes shake { 0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-6px)} 40%,80%{transform:translateX(6px)} }
+.shake { animation: shake 0.4s ease; }
+
+/* Card */
+.card { background: var(--color-bg-primary); border: 0.5px solid var(--color-border); border-radius: var(--radius-lg); padding: 1rem 1.25rem; }
+
+/* Badge / Tag */
+.tag { font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: var(--radius-pill); display: inline-block; border: 0.5px solid; }
+.tag-w1 { background: var(--blue-bg); color: var(--blue-text); border-color: var(--blue-border); }
+.tag-w2 { background: var(--green-bg); color: var(--green-text); border-color: var(--green-border); }
+.tag-w3 { background: var(--red-bg); color: var(--red-text); border-color: var(--red-border); }
+.tag-w4 { background: var(--purple-bg); color: var(--purple-text); border-color: var(--purple-border); }
+.tag-ahead { background: var(--green-bg); color: var(--green-text); border-color: var(--green-border); }
+.tag-ontrack { background: var(--blue-bg); color: var(--blue-text); border-color: var(--blue-border); }
+.tag-behind { background: var(--amber-bg); color: var(--amber-text); border-color: var(--amber-border); }
+.tag-atrisk { background: var(--red-bg); color: var(--red-text); border-color: var(--red-border); }
+.tag-notstarted { background: var(--color-bg-tertiary); color: var(--color-text-tertiary); border-color: var(--color-border); }
+
+/* Avatar */
+.avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 500; flex-shrink: 0; }
+
+/* Progress bar */
+.progress-bar { height: 6px; background: var(--color-bg-tertiary); border-radius: var(--radius-pill); overflow: hidden; }
+.progress-fill { height: 6px; background: var(--blue-border); border-radius: var(--radius-pill); transition: width 0.3s ease; }
+
+/* Setup view */
+.setup-center { max-width: 520px; margin: 40px auto; }
+.setup-center h1 { margin-bottom: 6px; }
+.setup-center p { color: var(--color-text-secondary); margin-bottom: 20px; font-size: 14px; }
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 4px; color: var(--color-text-secondary); }
+.member-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+.member-row input { flex: 1; }
+.member-row .pin-field { max-width: 90px; }
+.error-msg { color: var(--red-text); font-size: 12px; margin-top: 4px; }
+
+/* Login view */
+.login-center { max-width: 440px; margin: 60px auto; text-align: center; }
+.login-center h1 { margin-bottom: 4px; }
+.login-center .subtitle { color: var(--color-text-secondary); font-size: 14px; margin-bottom: 28px; }
+.member-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; margin-bottom: 20px; }
+.member-card { display: flex; align-items: center; gap: 10px; padding: 12px; cursor: pointer; transition: background 0.15s; }
+.member-card:hover { background: var(--color-bg-secondary); }
+.member-card.selected { border-color: var(--blue-border); background: var(--blue-bg); }
+.pin-entry { margin-top: 12px; display: flex; gap: 8px; align-items: center; justify-content: center; }
+.pin-entry input { max-width: 120px; text-align: center; letter-spacing: 6px; font-size: 18px; }
+.pin-error { color: var(--red-text); font-size: 12px; margin-top: 6px; }
+.manager-login-btn { margin-top: 24px; font-size: 13px; color: var(--color-text-tertiary); }
+
+/* Tabs */
+.tabs { display: flex; gap: 0; border-bottom: 0.5px solid var(--color-border); margin-bottom: 20px; overflow-x: auto; }
+.tab-btn { padding: 8px 16px; font-size: 13px; font-weight: 500; color: var(--color-text-secondary); background: none;
+  border: none; border-bottom: 2px solid transparent; border-radius: 0; cursor: pointer; white-space: nowrap; }
+.tab-btn:hover { color: var(--color-text-primary); background: none; }
+.tab-btn.active { color: var(--blue-text); border-bottom-color: var(--blue-border); }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* Week tabs (sub) */
+.week-tabs { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
+.week-tab { padding: 5px 14px; font-size: 12px; font-weight: 500; border-radius: var(--radius-pill); }
+.week-tab.active { background: var(--blue-bg); color: var(--blue-text); border-color: var(--blue-border); }
+
+/* Day row */
+.day-row { display: flex; align-items: flex-start; gap: 12px; padding: 10px 12px; border: 0.5px solid var(--color-border);
+  border-radius: var(--radius-md); margin-bottom: 6px; transition: background 0.15s; cursor: pointer; }
+.day-row:hover { background: var(--color-bg-secondary); }
+.day-row input[type="checkbox"] { margin-top: 4px; accent-color: var(--blue-border); flex-shrink: 0; width: 16px; height: 16px; }
+.day-row .day-info { flex: 1; min-width: 0; }
+.day-row .day-title { font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.day-row .day-title .day-num { color: var(--color-text-tertiary); font-size: 12px; }
+.day-row .day-desc { font-size: 13px; color: var(--color-text-secondary); margin-top: 4px; }
+.day-row.completed .day-title-text { text-decoration: line-through; color: var(--color-text-tertiary); }
+.day-expand { margin-top: 12px; padding-top: 12px; border-top: 0.5px solid var(--color-border); }
+.day-expand .field-group { margin-bottom: 12px; }
+.day-expand .field-group label { font-size: 12px; font-weight: 500; color: var(--color-text-secondary); display: block; margin-bottom: 4px; }
+.day-expand .proof-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.day-expand .proof-row input { flex: 1; min-width: 120px; }
+.resource-list { list-style: none; }
+.resource-list li { display: flex; align-items: baseline; gap: 8px; font-size: 13px; padding: 4px 0; }
+.resource-list li .meta { font-size: 12px; color: var(--color-text-tertiary); }
+.share-resource-form { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+.share-resource-form input { flex: 1; min-width: 100px; }
+
+/* Hero card (today's lesson) */
+.hero-card { border-left: 3px solid var(--blue-border); margin-bottom: 20px; }
+.hero-card .hero-label { font-size: 12px; color: var(--blue-text); font-weight: 500; margin-bottom: 6px; }
+.hero-card .hero-title { font-size: 16px; font-weight: 500; }
+.hero-card .hero-desc { font-size: 13px; color: var(--color-text-secondary); margin-top: 4px; }
+.hero-card .hero-actions { margin-top: 10px; }
+
+/* Streak */
+.streak { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; color: var(--amber-text); font-weight: 500; }
+
+/* Stats grid */
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; margin-bottom: 20px; }
+.stat-card { text-align: center; padding: 16px; }
+.stat-card .stat-value { font-size: 1.6rem; font-weight: 500; color: var(--blue-text); }
+.stat-card .stat-label { font-size: 12px; color: var(--color-text-secondary); margin-top: 2px; }
+
+/* Member overview cards (manager) */
+.team-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+.team-member-card { cursor: pointer; transition: background 0.15s; }
+.team-member-card:hover { background: var(--color-bg-secondary); }
+.team-member-card .member-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.team-member-card .member-name { font-weight: 500; font-size: 14px; }
+.team-member-card .member-progress-text { font-size: 12px; color: var(--color-text-secondary); margin: 6px 0 4px; }
+
+/* Modal / Side panel */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 200; display: flex; justify-content: flex-end; }
+.modal-panel { width: 560px; max-width: 100%; background: var(--color-bg-primary); height: 100%; overflow-y: auto; padding: 24px;
+  animation: slideIn 0.2s ease; }
+@keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+.modal-panel .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.modal-panel .modal-header h2 { font-size: 1.1rem; }
+.modal-panel .close-btn { background: none; border: none; font-size: 20px; color: var(--color-text-tertiary); padding: 4px 8px; }
+
+/* Manager note */
+.manager-note { border-left: 3px solid var(--color-border); padding: 8px 12px; margin-bottom: 8px; border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
+.manager-note.flag-behind { border-left-color: var(--amber-border); }
+.manager-note.flag-at-risk { border-left-color: var(--red-border); }
+.manager-note.flag-on-track { border-left-color: var(--blue-border); }
+.manager-note.flag-ahead { border-left-color: var(--green-border); }
+.manager-note .note-meta { font-size: 12px; color: var(--color-text-tertiary); margin-top: 4px; }
+
+/* Comments/resources table */
+.data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.data-table th { text-align: left; font-weight: 500; padding: 8px 10px; border-bottom: 0.5px solid var(--color-border); color: var(--color-text-secondary); font-size: 12px; }
+.data-table td { padding: 8px 10px; border-bottom: 0.5px solid var(--color-border); vertical-align: top; }
+.data-table tr:hover { background: var(--color-bg-secondary); }
+.filter-row { display: flex; gap: 10px; align-items: center; margin-bottom: 14px; flex-wrap: wrap; }
+.filter-row label { font-size: 12px; color: var(--color-text-secondary); font-weight: 500; }
+.filter-row select { width: auto; min-width: 140px; }
+
+/* Toast */
+.toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 300; display: flex; flex-direction: column; gap: 6px; }
+.toast { padding: 8px 16px; border-radius: var(--radius-md); font-size: 13px; font-weight: 500;
+  background: var(--color-text-primary); color: var(--color-bg-primary); animation: fadeIn 0.2s ease; }
+
+/* Backup banner */
+.backup-banner { background: var(--amber-bg); color: var(--amber-text); border: 0.5px solid var(--amber-border);
+  border-radius: var(--radius-md); padding: 8px 14px; font-size: 13px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+
+/* Danger zone */
+.danger-zone { border: 0.5px solid var(--red-border); border-radius: var(--radius-lg); padding: 16px; margin-top: 20px; }
+.danger-zone h3 { color: var(--red-text); margin-bottom: 8px; }
+
+/* Empty state */
+.empty-state { text-align: center; padding: 30px; color: var(--color-text-tertiary); font-size: 13px; }
+
+/* Responsive */
+@media (max-width: 640px) {
+  .main-content { padding: 16px 12px 50px; }
+  .app-footer { position: static; }
+  .modal-panel { width: 100%; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .team-grid { grid-template-columns: 1fr; }
+  .member-grid { grid-template-columns: repeat(2, 1fr); }
+  .data-table { font-size: 12px; }
+  .data-table th, .data-table td { padding: 6px; }
+  .proof-row { flex-direction: column; }
+}
+
+/* localStorage warning */
+.ls-warning { background: var(--red-bg); color: var(--red-text); border: 0.5px solid var(--red-border); padding: 12px 16px;
+  border-radius: var(--radius-md); text-align: center; font-size: 13px; margin: 20px; }
+</style>
+</head>
+<body>
+<div id="app">
+  <nav class="top-nav">
+    <div class="logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      Drone Learning Tracker
+    </div>
+    <div class="user-info" id="navUserInfo"></div>
+  </nav>
+
+  <div class="main-content">
+    <!-- SETUP VIEW -->
+    <div class="view" id="viewSetup">
+      <div class="setup-center">
+        <div class="card">
+          <h1>Set up your team</h1>
+          <p>Create your drone learning team to get started with the 28-day curriculum.</p>
+          <div class="form-group">
+            <label for="setupTeamName">Team name</label>
+            <input type="text" id="setupTeamName" placeholder="e.g. Alpha Squad">
+          </div>
+          <div class="form-group">
+            <label>Team members</label>
+            <div id="setupMembers"></div>
+            <button type="button" id="addMemberBtn" class="btn-sm" style="margin-top:6px">+ Add member</button>
+          </div>
+          <div class="form-group">
+            <label for="setupManagerPin">Manager access PIN — keep this private</label>
+            <input type="password" id="setupManagerPin" maxlength="4" inputmode="numeric" placeholder="4-digit PIN" style="max-width:160px">
+          </div>
+          <div id="setupError" class="error-msg" style="margin-bottom:10px"></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button id="createTeamBtn" class="btn-primary">Create team</button>
+            <button id="loadSampleBtn">Load sample data</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOGIN VIEW -->
+    <div class="view" id="viewLogin">
+      <div class="login-center">
+        <h1 id="loginTeamName"></h1>
+        <p class="subtitle">Select your name to log in</p>
+        <div class="member-grid" id="loginMemberGrid"></div>
+        <div id="loginPinArea" style="display:none">
+          <div class="pin-entry">
+            <input type="password" id="loginPinInput" maxlength="4" inputmode="numeric" placeholder="PIN">
+          </div>
+          <div id="loginPinError" class="pin-error"></div>
+        </div>
+        <div class="manager-login-btn">
+          <button id="managerLoginBtn">Manager access</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MEMBER DASHBOARD -->
+    <div class="view" id="viewMember">
+      <div id="memberHero"></div>
+      <div class="tabs" id="memberTabs">
+        <button class="tab-btn active" data-tab="memberProgress">My progress</button>
+        <button class="tab-btn" data-tab="memberResources">My resources</button>
+        <button class="tab-btn" data-tab="teamResources">Team resources</button>
+      </div>
+      <div class="tab-panel active" id="memberProgress"></div>
+      <div class="tab-panel" id="memberResources"></div>
+      <div class="tab-panel" id="teamResources"></div>
+    </div>
+
+    <!-- MANAGER DASHBOARD -->
+    <div class="view" id="viewManager">
+      <div id="managerBackupBanner"></div>
+      <div class="tabs" id="managerTabs">
+        <button class="tab-btn active" data-tab="mgrOverview">Team overview</button>
+        <button class="tab-btn" data-tab="mgrComments">All comments</button>
+        <button class="tab-btn" data-tab="mgrResources">All resources</button>
+        <button class="tab-btn" data-tab="mgrExport">Export &amp; settings</button>
+      </div>
+      <div class="tab-panel active" id="mgrOverview"></div>
+      <div class="tab-panel" id="mgrComments"></div>
+      <div class="tab-panel" id="mgrResources"></div>
+      <div class="tab-panel" id="mgrExport"></div>
+    </div>
+  </div>
+
+  <footer class="app-footer">
+    <span>Drone Learning Tracker · 28-day program</span>
+    <span id="footerUser"></span>
+  </footer>
+</div>
+
+<!-- Modal for member detail (manager) -->
+<div id="memberDetailModal" class="modal-overlay" style="display:none"></div>
+
+<!-- Toast container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+'use strict';
+
+// ─── CURRICULUM ───
+const CURRICULUM=[
+{week:1,day:1,tag:"Foundation",title:"What is a drone? Types & taxonomy",desc:"Fixed-wing vs rotary vs hybrid. Consumer, commercial, military. FPV introduced here."},
+{week:1,day:2,tag:"Foundation",title:"Drone anatomy — the hardware",desc:"Frame, motors, ESCs, propellers, battery. How each part converts energy to motion."},
+{week:1,day:3,tag:"Foundation",title:"How a drone flies — physics",desc:"Thrust, lift, drag, torque. Why quadcopters use 4 motors in X pattern. Gyroscopic effect."},
+{week:1,day:4,tag:"Foundation",title:"The brain — flight controllers",desc:"What a FC does. PID loops. Stabilisation. Inertial measurement units (IMU)."},
+{week:1,day:5,tag:"Foundation",title:"Power systems — batteries & ESCs",desc:"LiPo cells, C-ratings, voltage sag. How ESCs translate signals to motor speed."},
+{week:1,day:6,tag:"Military",title:"FPV drones — what they really are",desc:"First-person-view system. Camera + video transmitter + goggles. Latency is everything."},
+{week:1,day:7,tag:"Foundation",title:"Week 1 review + visual map",desc:"Draw your own drone system diagram. Consolidate all hardware concepts."},
+{week:2,day:8,tag:"AI & Tech",title:"How AI connects to a drone",desc:"The pipeline: sensors → AI model → flight controller → motors. Where AI sits."},
+{week:2,day:9,tag:"AI & Tech",title:"Computer vision — how drones see",desc:"Camera feeds → object detection models (YOLO, MobileNet). Bounding boxes. Confidence scores."},
+{week:2,day:10,tag:"AI & Tech",title:"Object detection deep dive",desc:"How YOLO works in real time. Training vs inference. What edge means for detection speed."},
+{week:2,day:11,tag:"AI & Tech",title:"Offline AI — edge computing on drones",desc:"Why no internet on a battlefield drone. NVIDIA Jetson, Raspberry Pi, STM32. TensorFlow Lite."},
+{week:2,day:12,tag:"AI & Tech",title:"Communication & signal systems",desc:"RF bands, protocols (MAVLink), GPS/GNSS. How GPS spoofing & jamming work."},
+{week:2,day:13,tag:"AI & Tech",title:"Swarm coordination",desc:"How drones talk to each other. Mesh networks. Decentralised vs centralised swarms. Real examples."},
+{week:2,day:14,tag:"AI & Tech",title:"AI problems & how they are solved",desc:"Latency, compute limits, sensor noise, adversarial conditions. What engineers do about each."},
+{week:3,day:15,tag:"Military",title:"FPV kamikazes — Ukraine's weapon of choice",desc:"How a $400 FPV drone became one of the most effective weapons in modern war. Tactics explained."},
+{week:3,day:16,tag:"Military",title:"Cost vs effectiveness analysis",desc:"FPV drone ~$400 vs tank ~$4M. The economics of asymmetric drone warfare. Real kill-cost ratios."},
+{week:3,day:17,tag:"Military",title:"Ukraine's drone ecosystem",desc:"Mavic 3 for recon, Lancet for loitering, Shahed-136 on Russia's side. Each type's role."},
+{week:3,day:18,tag:"Military",title:"Global drone arms race",desc:"US, China, Turkey (Bayraktar), Iran, Israel. Who leads, who copies, who sells."},
+{week:3,day:19,tag:"Military",title:"Anti-drone systems — jamming",desc:"RF jamming guns. GPS denial. How they work, range limits, what they can and can't stop."},
+{week:3,day:20,tag:"Military",title:"Anti-drone systems — interception & kinetic",desc:"Nets, eagles, laser systems, micro-missiles. Cost paradox: expensive interceptors vs cheap drones."},
+{week:3,day:21,tag:"Military",title:"Anti-drone AI — detect, classify, engage",desc:"Radar + AI for drone detection. Acoustic sensors. Visual AI classification. Automated response."},
+{week:4,day:22,tag:"Build",title:"AI vision on a real board",desc:"Raspberry Pi + camera + TFLite object detection. Running inference without internet. Hands-on."},
+{week:4,day:23,tag:"Build",title:"MAVLink & flight controller comms",desc:"How to send commands to a drone via software. ArduPilot, PX4 ecosystem overview."},
+{week:4,day:24,tag:"Build",title:"Building a basic autonomy loop",desc:"See → Decide → Act. Writing a simple if-then autonomy in Python. Simulating in Gazebo."},
+{week:4,day:25,tag:"Build",title:"Offline swarm concepts — hands-on",desc:"Simulating two-drone coordination. RF mesh with ESP32 modules. No cloud, no GPS needed."},
+{week:4,day:26,tag:"Build",title:"Defense tech landscape — career & project paths",desc:"How defense contractors use drone AI. Open-source projects (ArduPilot, PX4, OpenCV)."},
+{week:4,day:27,tag:"Build",title:"Costs — from hobbyist to military grade",desc:"Component cost breakdown at every level. $200 FPV kit → $50k commercial → $10M military system."},
+{week:4,day:28,tag:"Build",title:"Final review — your drone knowledge map",desc:"Build your complete concept map. Identify what to go deeper on. Define your month-2 plan."}
+];
+
+const SAMPLE_TEAM={name:"Alpha Squad",users:[
+{id:"u1",name:"Ahmed",pin:"1234",role:"member"},
+{id:"u2",name:"Sara",pin:"2222",role:"member"},
+{id:"u3",name:"Omar",pin:"3333",role:"member"},
+{id:"mgr",name:"Manager",pin:"0000",role:"manager"}
+]};
+
+// ─── LOCALSTORAGE HELPERS ───
+let lsAvailable=true;
+function lsGet(key,fallback){try{const v=localStorage.getItem('drone_'+key);return v?JSON.parse(v):fallback;}catch(e){return fallback;}}
+function lsSet(key,val){try{localStorage.setItem('drone_'+key,JSON.stringify(val));}catch(e){}}
+function lsGetRaw(key){try{return localStorage.getItem('drone_'+key);}catch(e){return null;}}
+function lsSetRaw(key,val){try{localStorage.setItem('drone_'+key,val);}catch(e){}}
+function lsRemove(key){try{localStorage.removeItem('drone_'+key);}catch(e){}}
+(function checkLS(){try{localStorage.setItem('drone__test','1');localStorage.removeItem('drone__test');}catch(e){lsAvailable=false;const w=document.createElement('div');w.className='ls-warning';w.textContent='localStorage is not available. Data cannot be saved.';document.body.prepend(w);}})();
+
+// ─── STATE ───
+let currentUser=null;
+let expandedDay=null;
+
+// ─── HELPERS ───
+function uid(){return 'id_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,7);}
+function fmtDate(iso){if(!iso)return'—';return new Date(iso).toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'});}
+function escHtml(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+const AVATAR_COLORS=[
+{bg:'var(--blue-bg)',text:'var(--blue-text)'},{bg:'var(--green-bg)',text:'var(--green-text)'},
+{bg:'var(--purple-bg)',text:'var(--purple-text)'},{bg:'var(--amber-bg)',text:'var(--amber-text)'}
+];
+function avatarColor(name){let h=0;for(let i=0;i<name.length;i++)h=name.charCodeAt(i)+((h<<5)-h);return AVATAR_COLORS[Math.abs(h)%AVATAR_COLORS.length];}
+function initials(name){const p=name.trim().split(/\s+/);if(p.length>=2)return(p[0][0]+p[p.length-1][0]).toUpperCase();return name.slice(0,2).toUpperCase();}
+function avatarHtml(name,size){const c=avatarColor(name);const s=size||36;return`<div class="avatar" style="width:${s}px;height:${s}px;background:${c.bg};color:${c.text}">${initials(name)}</div>`;}
+function weekTagClass(w){return'tag-w'+w;}
+function statusInfo(userId){
+  const users=lsGet('users',[]);const progress=lsGet('progress',{});
+  const up=progress[userId]||{};
+  const completed=Object.values(up).filter(d=>d.completed).length;
+  const startDate=lsGetRaw('start_date');
+  if(!startDate)return{status:'not-started',label:'Not started',completed,cls:'tag-notstarted'};
+  const elapsed=Math.min(28,Math.floor((Date.now()-new Date(startDate).getTime())/86400000)+1);
+  if(completed===0&&elapsed>2)return{status:'not-started',label:'Not started',completed,expected:elapsed,cls:'tag-notstarted'};
+  if(completed>elapsed+2)return{status:'ahead',label:'Ahead',completed,expected:elapsed,cls:'tag-ahead'};
+  if(completed>=elapsed-1)return{status:'on-track',label:'On track',completed,expected:elapsed,cls:'tag-ontrack'};
+  return{status:'behind',label:'Behind',completed,expected:elapsed,cls:'tag-behind'};
+}
+function streak(userId){
+  const progress=lsGet('progress',{});const up=progress[userId]||{};
+  let s=0;for(let d=28;d>=1;d--){if(up[d]&&up[d].completed)s++;else if(s>0)break;}
+  // also try from current expected day downward
+  const startDate=lsGetRaw('start_date');
+  if(!startDate)return s;
+  const elapsed=Math.min(28,Math.floor((Date.now()-new Date(startDate).getTime())/86400000)+1);
+  let s2=0;for(let d=elapsed;d>=1;d--){if(up[d]&&up[d].completed)s2++;else break;}
+  return Math.max(s,s2);
+}
+function todayDay(){
+  const sd=lsGetRaw('start_date');if(!sd)return 1;
+  return Math.min(28,Math.max(1,Math.floor((Date.now()-new Date(sd).getTime())/86400000)+1));
+}
+
+// ─── TOAST ───
+function toast(msg){
+  const c=document.getElementById('toastContainer');
+  const t=document.createElement('div');t.className='toast';t.textContent=msg;c.appendChild(t);
+  setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity 0.3s';setTimeout(()=>t.remove(),300);},1500);
+}
+
+// ─── VIEW SWITCHING ───
+function showView(id){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  const v=document.getElementById(id);if(v)v.classList.add('active');
+}
+
+// ─── TAB SWITCHING ───
+document.addEventListener('click',e=>{
+  const btn=e.target.closest('.tab-btn');if(!btn)return;
+  const tabs=btn.closest('.tabs');if(!tabs)return;
+  tabs.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
+  const panelId=btn.dataset.tab;
+  const container=tabs.parentElement;
+  container.querySelectorAll(':scope > .tab-panel').forEach(p=>{p.classList.toggle('active',p.id===panelId);});
+});
+
+// ─── SETUP VIEW ───
+let memberRows=1;
+function renderSetup(){
+  const container=document.getElementById('setupMembers');
+  container.innerHTML='';memberRows=0;addMemberRow();addMemberRow();
+}
+function addMemberRow(){
+  if(memberRows>=5)return;memberRows++;
+  const div=document.createElement('div');div.className='member-row';
+  div.innerHTML=`<input type="text" placeholder="Name" class="member-name-input"><input type="password" placeholder="PIN" maxlength="4" inputmode="numeric" class="pin-field member-pin-input"><button type="button" class="btn-sm btn-danger remove-member-btn">✕</button>`;
+  document.getElementById('setupMembers').appendChild(div);
+  div.querySelector('.remove-member-btn').onclick=()=>{if(memberRows>1){div.remove();memberRows--;}};
+}
+document.getElementById('addMemberBtn').onclick=addMemberRow;
+
+document.getElementById('loadSampleBtn').onclick=()=>{
+  lsSetRaw('team_name',SAMPLE_TEAM.name);
+  lsSet('users',SAMPLE_TEAM.users);
+  lsSetRaw('start_date',new Date().toISOString());
+  lsSet('progress',{});lsSet('resources',[]);lsSet('manager_notes',{});
+  toast('Sample data loaded');init();
+};
+
+document.getElementById('createTeamBtn').onclick=()=>{
+  const errEl=document.getElementById('setupError');errEl.textContent='';
+  const teamName=document.getElementById('setupTeamName').value.trim();
+  if(!teamName){errEl.textContent='Team name is required.';return;}
+  const nameInputs=document.querySelectorAll('.member-name-input');
+  const pinInputs=document.querySelectorAll('.member-pin-input');
+  const mgrPin=document.getElementById('setupManagerPin').value.trim();
+  if(!/^\d{4}$/.test(mgrPin)){errEl.textContent='Manager PIN must be exactly 4 digits.';return;}
+  const users=[];const names=new Set();
+  for(let i=0;i<nameInputs.length;i++){
+    const n=nameInputs[i].value.trim();const p=pinInputs[i].value.trim();
+    if(!n||!p){errEl.textContent='All member fields must be filled.';return;}
+    if(!/^\d{4}$/.test(p)){errEl.textContent=`PIN for "${n}" must be exactly 4 digits.`;return;}
+    if(names.has(n.toLowerCase())){errEl.textContent=`Duplicate name: "${n}".`;return;}
+    names.add(n.toLowerCase());
+    users.push({id:uid(),name:n,pin:p,role:'member'});
+  }
+  users.push({id:uid(),name:'Manager',pin:mgrPin,role:'manager'});
+  lsSetRaw('team_name',teamName);lsSet('users',users);
+  lsSetRaw('start_date',new Date().toISOString());
+  lsSet('progress',{});lsSet('resources',[]);lsSet('manager_notes',{});
+  toast('Team created!');init();
+};
+
+// ─── LOGIN VIEW ───
+let selectedLoginUser=null;
+function renderLogin(){
+  const teamName=lsGetRaw('team_name')||'Team';
+  document.getElementById('loginTeamName').textContent=teamName;
+  const users=lsGet('users',[]);const members=users.filter(u=>u.role==='member');
+  const grid=document.getElementById('loginMemberGrid');grid.innerHTML='';
+  members.forEach(u=>{
+    const card=document.createElement('div');card.className='card member-card';
+    card.innerHTML=avatarHtml(u.name)+`<span>${escHtml(u.name)}</span>`;
+    card.onclick=()=>selectLoginUser(u,card);
+    grid.appendChild(card);
+  });
+  document.getElementById('loginPinArea').style.display='none';
+  document.getElementById('loginPinError').textContent='';selectedLoginUser=null;
+  updateNav(null);
+}
+function selectLoginUser(user,card){
+  document.querySelectorAll('.member-card').forEach(c=>c.classList.remove('selected'));
+  card.classList.add('selected');selectedLoginUser=user;
+  const area=document.getElementById('loginPinArea');area.style.display='block';
+  const inp=document.getElementById('loginPinInput');inp.value='';inp.focus();
+  document.getElementById('loginPinError').textContent='';
+}
+document.getElementById('loginPinInput').addEventListener('input',function(){
+  if(this.value.length===4){
+    if(selectedLoginUser&&this.value===selectedLoginUser.pin){loginAs(selectedLoginUser);}
+    else{wrongPin(this);}
+  }
+});
+document.getElementById('managerLoginBtn').onclick=()=>{
+  const users=lsGet('users',[]);const mgr=users.find(u=>u.role==='manager');
+  if(mgr){selectedLoginUser=mgr;
+    document.querySelectorAll('.member-card').forEach(c=>c.classList.remove('selected'));
+    const area=document.getElementById('loginPinArea');area.style.display='block';
+    const inp=document.getElementById('loginPinInput');inp.value='';inp.focus();
+    document.getElementById('loginPinError').textContent='';
+  }
+};
+function wrongPin(inp){
+  inp.classList.add('shake');document.getElementById('loginPinError').textContent='Incorrect PIN';
+  setTimeout(()=>{inp.classList.remove('shake');inp.value='';},400);
+}
+function loginAs(user){
+  currentUser=user;
+  if(user.role==='manager'){showView('viewManager');renderManagerDashboard();}
+  else{showView('viewMember');renderMemberDashboard();}
+  updateNav(user);
+}
+function updateNav(user){
+  const info=document.getElementById('navUserInfo');
+  const footer=document.getElementById('footerUser');
+  if(!user){info.innerHTML='';footer.textContent='';return;}
+  info.innerHTML=avatarHtml(user.name,28)+`<span>${escHtml(user.name)}</span><button id="logoutBtn" class="btn-sm">Log out</button>`;
+  footer.textContent=user.name;
+  document.getElementById('logoutBtn').onclick=logout;
+}
+function logout(){currentUser=null;selectedLoginUser=null;expandedDay=null;showView('viewLogin');renderLogin();}
+
+// ─── MEMBER DASHBOARD ───
+function renderMemberDashboard(){
+  if(!currentUser)return;
+  renderMemberHero();renderMemberProgress();renderMemberResources();renderTeamResources();
+  // reset tabs to first
+  const tabs=document.getElementById('memberTabs');
+  tabs.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',i===0));
+  document.getElementById('memberProgress').classList.add('active');
+  document.getElementById('memberResources').classList.remove('active');
+  document.getElementById('teamResources').classList.remove('active');
+}
+
+function renderMemberHero(){
+  const el=document.getElementById('memberHero');
+  const td=todayDay();const lesson=CURRICULUM.find(c=>c.day===td);
+  if(!lesson){el.innerHTML='';return;}
+  const progress=lsGet('progress',{});const up=progress[currentUser.id]||{};
+  const done=up[td]&&up[td].completed;
+  const si=statusInfo(currentUser.id);const sk=streak(currentUser.id);
+  el.innerHTML=`
+    <div class="card hero-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+        <span class="hero-label">${done?'✓ Completed today':'Today\'s lesson — Day '+td}</span>
+        ${sk>1?`<span class="streak">🔥 ${sk}-day streak</span>`:''}
+      </div>
+      <div class="hero-title">${escHtml(lesson.title)}</div>
+      <div class="hero-desc">${escHtml(lesson.desc)}</div>
+      <div style="display:flex;align-items:center;gap:12px;margin-top:10px;flex-wrap:wrap">
+        <div style="flex:1;min-width:120px"><div class="progress-bar"><div class="progress-fill" style="width:${(si.completed/28*100).toFixed(1)}%"></div></div></div>
+        <span style="font-size:13px;color:var(--color-text-secondary)">${si.completed}/28 completed</span>
+        <span class="tag ${si.cls}">${si.label}</span>
+      </div>
+    </div>`;
+}
+
+let activeWeek=1;
+function renderMemberProgress(){
+  const panel=document.getElementById('memberProgress');
+  const progress=lsGet('progress',{});const up=progress[currentUser.id]||{};
+  let html=`<div class="week-tabs">`;
+  for(let w=1;w<=4;w++){html+=`<button class="week-tab ${w===activeWeek?'active':''}" onclick="switchWeek(${w})">Week ${w}</button>`;}
+  html+=`</div><div id="daysList"></div>`;
+  panel.innerHTML=html;
+  renderDaysList();
+}
+function switchWeek(w){activeWeek=w;expandedDay=null;renderMemberProgress();}
+
+function renderDaysList(){
+  const container=document.getElementById('daysList');if(!container)return;
+  const progress=lsGet('progress',{});const up=progress[currentUser.id]||{};
+  const days=CURRICULUM.filter(c=>c.week===activeWeek);
+  const resources=lsGet('resources',[]);
+  let html='';
+  days.forEach(lesson=>{
+    const dp=up[lesson.day]||{completed:false,completedAt:null,comment:'',proofLink:'',proofLabel:''};
+    const isExpanded=expandedDay===lesson.day;
+    const dayResources=resources.filter(r=>r.day===lesson.day);
+    html+=`<div class="day-row ${dp.completed?'completed':''}" id="dayRow${lesson.day}">
+      <input type="checkbox" ${dp.completed?'checked':''} onclick="event.stopPropagation();toggleDay(${lesson.day},this.checked)" aria-label="Mark day ${lesson.day} complete">
+      <div class="day-info" onclick="toggleExpand(${lesson.day})">
+        <div class="day-title">
+          <span class="day-num">Day ${lesson.day}</span>
+          <span class="day-title-text">${escHtml(lesson.title)}</span>
+          <span class="tag ${weekTagClass(lesson.week)}">${escHtml(lesson.tag)}</span>
+        </div>
+        ${isExpanded?'':`<div class="day-desc">${escHtml(lesson.desc)}</div>`}
+        ${isExpanded?`<div class="day-expand">
+          <div class="day-desc" style="margin-bottom:12px">${escHtml(lesson.desc)}</div>
+          <div class="field-group">
+            <label>Your notes</label>
+            <textarea id="comment${lesson.day}" onblur="saveComment(${lesson.day},this.value)" placeholder="Add your notes for this session…">${escHtml(dp.comment||'')}</textarea>
+          </div>
+          <div class="field-group">
+            <label>Proof of work</label>
+            <div class="proof-row">
+              <input type="text" id="proofLabel${lesson.day}" placeholder="Label" value="${escHtml(dp.proofLabel||'')}">
+              <input type="url" id="proofLink${lesson.day}" placeholder="URL" value="${escHtml(dp.proofLink||'')}">
+              <button onclick="saveProof(${lesson.day})" class="btn-sm btn-primary">Save</button>
+            </div>
+            ${dp.proofLink?`<div style="margin-top:6px;font-size:12px"><a href="${escHtml(dp.proofLink)}" target="_blank">${escHtml(dp.proofLabel||dp.proofLink)}</a></div>`:''}
+          </div>
+          <div class="field-group">
+            <label>Resources for this day</label>
+            ${dayResources.length?`<ul class="resource-list">${dayResources.map(r=>`<li><a href="${escHtml(r.url)}" target="_blank">${escHtml(r.title)}</a><span class="meta">by ${escHtml(r.userName)} · ${fmtDate(r.addedAt)}</span></li>`).join('')}</ul>`:`<div class="empty-state" style="padding:8px">No resources shared yet for this session</div>`}
+            <div class="share-resource-form">
+              <input type="text" id="resTitle${lesson.day}" placeholder="Resource title">
+              <input type="url" id="resUrl${lesson.day}" placeholder="URL">
+              <button onclick="addResource(${lesson.day})" class="btn-sm btn-primary">Add</button>
+            </div>
+          </div>
+        </div>`:''}
+      </div>
+    </div>`;
+  });
+  container.innerHTML=html;
+}
+
+function toggleExpand(day){expandedDay=expandedDay===day?null:day;renderDaysList();}
+
+function toggleDay(day,checked){
+  if(!currentUser)return;
+  const progress=lsGet('progress',{});
+  if(!progress[currentUser.id])progress[currentUser.id]={};
+  const dp=progress[currentUser.id][day]||{completed:false,completedAt:null,comment:'',proofLink:'',proofLabel:''};
+  if(!checked&&dp.completed){if(!confirm('Mark Day '+day+' as incomplete? Your notes will be kept.'))
+    {renderDaysList();return;}}
+  dp.completed=checked;dp.completedAt=checked?new Date().toISOString():null;
+  progress[currentUser.id][day]=dp;lsSet('progress',progress);
+  renderMemberHero();renderDaysList();
+  toast(checked?'Day '+day+' completed!':'Day '+day+' marked incomplete');
+}
+
+function saveComment(day,val){
+  if(!currentUser)return;
+  const progress=lsGet('progress',{});
+  if(!progress[currentUser.id])progress[currentUser.id]={};
+  if(!progress[currentUser.id][day])progress[currentUser.id][day]={completed:false,completedAt:null,comment:'',proofLink:'',proofLabel:''};
+  progress[currentUser.id][day].comment=val;lsSet('progress',progress);toast('Notes saved');
+}
+
+function saveProof(day){
+  if(!currentUser)return;
+  const label=document.getElementById('proofLabel'+day).value.trim();
+  const link=document.getElementById('proofLink'+day).value.trim();
+  const progress=lsGet('progress',{});
+  if(!progress[currentUser.id])progress[currentUser.id]={};
+  if(!progress[currentUser.id][day])progress[currentUser.id][day]={completed:false,completedAt:null,comment:'',proofLink:'',proofLabel:''};
+  progress[currentUser.id][day].proofLink=link;progress[currentUser.id][day].proofLabel=label;
+  lsSet('progress',progress);renderDaysList();toast('Proof saved');
+}
+
+function addResource(day){
+  if(!currentUser)return;
+  const titleEl=document.getElementById('resTitle'+day);const urlEl=document.getElementById('resUrl'+day);
+  const title=titleEl.value.trim();const url=urlEl.value.trim();
+  if(!title||!url)return;
+  const resources=lsGet('resources',[]);
+  resources.push({id:uid(),day:day,userId:currentUser.id,userName:currentUser.name,title:title,url:url,addedAt:new Date().toISOString()});
+  lsSet('resources',resources);titleEl.value='';urlEl.value='';renderDaysList();toast('Resource added');
+}
+
+function renderMemberResources(){
+  const panel=document.getElementById('memberResources');if(!currentUser){panel.innerHTML='';return;}
+  const resources=lsGet('resources',[]).filter(r=>r.userId===currentUser.id).sort((a,b)=>new Date(b.addedAt)-new Date(a.addedAt));
+  if(!resources.length){panel.innerHTML='<div class="empty-state">You haven\'t shared any resources yet</div>';return;}
+  let html='<table class="data-table"><thead><tr><th>Day</th><th>Title</th><th>Date added</th><th></th></tr></thead><tbody>';
+  resources.forEach(r=>{
+    html+=`<tr><td>${r.day}</td><td><a href="${escHtml(r.url)}" target="_blank">${escHtml(r.title)}</a></td><td>${fmtDate(r.addedAt)}</td><td><button class="btn-sm btn-danger" onclick="deleteResource('${r.id}')">Delete</button></td></tr>`;
+  });
+  html+='</tbody></table>';panel.innerHTML=html;
+}
+
+function deleteResource(id){
+  if(!confirm('Delete this resource?'))return;
+  let resources=lsGet('resources',[]);resources=resources.filter(r=>r.id!==id);
+  lsSet('resources',resources);renderMemberResources();renderTeamResources();renderDaysList();toast('Resource deleted');
+}
+
+function renderTeamResources(){
+  const panel=document.getElementById('teamResources');
+  const resources=lsGet('resources',[]).sort((a,b)=>new Date(b.addedAt)-new Date(a.addedAt));
+  if(!resources.length){panel.innerHTML='<div class="empty-state">No resources shared by the team yet</div>';return;}
+  let html='<table class="data-table"><thead><tr><th>Day</th><th>Title</th><th>Shared by</th><th>Date</th></tr></thead><tbody>';
+  resources.forEach(r=>{
+    html+=`<tr><td>${r.day}</td><td><a href="${escHtml(r.url)}" target="_blank">${escHtml(r.title)}</a></td><td>${escHtml(r.userName)}</td><td>${fmtDate(r.addedAt)}</td></tr>`;
+  });
+  html+='</tbody></table>';panel.innerHTML=html;
+}
+
+// ─── MANAGER DASHBOARD ───
+function renderManagerDashboard(){
+  renderBackupBanner();renderMgrOverview();renderMgrComments();renderMgrResources();renderMgrExport();
+  const tabs=document.getElementById('managerTabs');
+  tabs.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',i===0));
+  document.getElementById('mgrOverview').classList.add('active');
+  document.getElementById('mgrComments').classList.remove('active');
+  document.getElementById('mgrResources').classList.remove('active');
+  document.getElementById('mgrExport').classList.remove('active');
+}
+
+function renderBackupBanner(){
+  const el=document.getElementById('managerBackupBanner');
+  const lastExport=lsGetRaw('last_export');
+  if(!lastExport){el.innerHTML=`<div class="backup-banner">You haven't exported your team data yet — consider backing up.<button class="btn-sm" onclick="document.querySelector('[data-tab=mgrExport]').click()" style="margin-left:auto">Go to export</button></div>`;return;}
+  const days=Math.floor((Date.now()-new Date(lastExport).getTime())/86400000);
+  if(days>=7){el.innerHTML=`<div class="backup-banner">Last export was ${days} days ago — consider backing up.<button class="btn-sm" onclick="document.querySelector('[data-tab=mgrExport]').click()" style="margin-left:auto">Go to export</button></div>`;}
+  else{el.innerHTML='';}
+}
+
+function renderMgrOverview(){
+  const panel=document.getElementById('mgrOverview');
+  const users=lsGet('users',[]);const members=users.filter(u=>u.role==='member');
+  const progress=lsGet('progress',{});const resources=lsGet('resources',[]);
+  const totalCompleted=members.reduce((s,u)=>{const up=progress[u.id]||{};return s+Object.values(up).filter(d=>d.completed).length;},0);
+  const totalPossible=members.length*28;
+  const overallPct=totalPossible?Math.round(totalCompleted/totalPossible*100):0;
+  // Days completed in last 7 days
+  const weekAgo=Date.now()-7*86400000;
+  let recentDays=0;
+  members.forEach(u=>{const up=progress[u.id]||{};Object.values(up).forEach(d=>{if(d.completed&&d.completedAt&&new Date(d.completedAt).getTime()>weekAgo)recentDays++;});});
+
+  let html=`<div class="stats-grid">
+    <div class="card stat-card"><div class="stat-value">${members.length}</div><div class="stat-label">Team members</div></div>
+    <div class="card stat-card"><div class="stat-value">${overallPct}%</div><div class="stat-label">Overall completion</div></div>
+    <div class="card stat-card"><div class="stat-value">${recentDays}</div><div class="stat-label">Days completed this week</div></div>
+    <div class="card stat-card"><div class="stat-value">${resources.length}</div><div class="stat-label">Resources shared</div></div>
+  </div>`;
+  html+=`<h3 style="margin-bottom:12px">Team members</h3><div class="team-grid">`;
+  const managerNotes=lsGet('manager_notes',{});
+  members.forEach(u=>{
+    const si=statusInfo(u.id);
+    const notes=managerNotes[u.id]||[];
+    const latestFlag=notes.length?notes[notes.length-1].flag:'none';
+    const flagOverride=latestFlag==='at-risk'||latestFlag==='behind';
+    const displayCls=flagOverride&&latestFlag==='at-risk'?'tag-atrisk':si.cls;
+    const displayLabel=flagOverride&&latestFlag==='at-risk'?'At risk':si.label;
+    html+=`<div class="card team-member-card" onclick="openMemberDetail('${u.id}')">
+      <div class="member-header">${avatarHtml(u.name)}<div><div class="member-name">${escHtml(u.name)}</div></div></div>
+      <div class="member-progress-text">${si.completed}/28 completed</div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${(si.completed/28*100).toFixed(1)}%"></div></div>
+      <div style="margin-top:8px"><span class="tag ${displayCls}">${displayLabel}</span></div>
+    </div>`;
+  });
+  html+=`</div>`;
+  panel.innerHTML=html;
+}
+
+// ─── MEMBER DETAIL MODAL ───
+function openMemberDetail(userId){
+  const users=lsGet('users',[]);const user=users.find(u=>u.id===userId);if(!user)return;
+  const progress=lsGet('progress',{});const up=progress[userId]||{};
+  const resources=lsGet('resources',[]).filter(r=>r.userId===userId);
+  const managerNotes=lsGet('manager_notes',{});const notes=(managerNotes[userId]||[]).slice().reverse();
+  const si=statusInfo(userId);
+
+  let html=`<div class="modal-panel"><div class="modal-header">
+    <div style="display:flex;align-items:center;gap:10px">${avatarHtml(user.name)}<div><h2>${escHtml(user.name)}</h2><span class="tag ${si.cls}" style="margin-top:4px">${si.label} — ${si.completed}/28</span></div></div>
+    <button class="close-btn" onclick="closeMemberDetail()">✕</button>
+  </div>`;
+
+  // Week-by-week
+  for(let w=1;w<=4;w++){
+    const days=CURRICULUM.filter(c=>c.week===w);
+    html+=`<details style="margin-bottom:12px"><summary style="cursor:pointer;font-weight:500;font-size:14px;margin-bottom:6px">Week ${w}</summary>`;
+    days.forEach(lesson=>{
+      const dp=up[lesson.day]||{};
+      html+=`<div style="padding:6px 0;border-bottom:0.5px solid var(--color-border);font-size:13px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="color:${dp.completed?'var(--green-text)':'var(--color-text-tertiary)'}">${dp.completed?'✓':'○'}</span>
+          <span>Day ${lesson.day}: ${escHtml(lesson.title)}</span>
+        </div>
+        ${dp.comment?`<div style="margin-left:24px;color:var(--color-text-secondary);font-size:12px;margin-top:2px">"${escHtml(dp.comment)}"</div>`:''}
+        ${dp.proofLink?`<div style="margin-left:24px;font-size:12px;margin-top:2px"><a href="${escHtml(dp.proofLink)}" target="_blank">${escHtml(dp.proofLabel||'Proof')}</a></div>`:''}
+      </div>`;
+    });
+    html+=`</details>`;
+  }
+
+  // Resources
+  html+=`<h3 style="margin:16px 0 8px">Shared resources</h3>`;
+  if(resources.length){
+    html+=`<ul class="resource-list">`;
+    resources.forEach(r=>{html+=`<li><a href="${escHtml(r.url)}" target="_blank">${escHtml(r.title)}</a><span class="meta">Day ${r.day} · ${fmtDate(r.addedAt)}</span></li>`;});
+    html+=`</ul>`;
+  }else{html+=`<div class="empty-state" style="padding:8px">No resources shared</div>`;}
+
+  // Manager notes
+  html+=`<h3 style="margin:16px 0 8px">Manager notes</h3>`;
+  notes.forEach(n=>{
+    const flagCls=n.flag==='none'?'':`flag-${n.flag.replace(' ','-')}`;
+    html+=`<div class="manager-note ${flagCls}"><div>${escHtml(n.text)}</div><div class="note-meta">${n.flag!=='none'?`<span class="tag tag-${n.flag==='at-risk'?'atrisk':n.flag==='on-track'?'ontrack':n.flag}" style="margin-right:6px">${n.flag}</span>`:''}${fmtDate(n.createdAt)}</div></div>`;
+  });
+  if(!notes.length)html+=`<div class="empty-state" style="padding:8px">No notes yet</div>`;
+
+  // Add note form
+  html+=`<div style="margin-top:12px;padding:12px;background:var(--color-bg-secondary);border-radius:var(--radius-md)">
+    <label style="font-size:12px;font-weight:500;color:var(--color-text-secondary);display:block;margin-bottom:4px">Add a note</label>
+    <textarea id="mgrNoteText" placeholder="Write a note about this member…"></textarea>
+    <div style="display:flex;gap:8px;margin-top:8px;align-items:center;flex-wrap:wrap">
+      <select id="mgrNoteFlag" style="width:auto;min-width:120px">
+        <option value="none">No flag</option><option value="behind">Behind</option><option value="at-risk">At risk</option><option value="on-track">On track</option><option value="ahead">Ahead</option>
+      </select>
+      <button class="btn-primary btn-sm" onclick="saveManagerNote('${userId}')">Save note</button>
+    </div>
+  </div>`;
+
+  html+=`</div>`;
+  const modal=document.getElementById('memberDetailModal');modal.innerHTML=html;modal.style.display='flex';
+  modal.onclick=e=>{if(e.target===modal)closeMemberDetail();};
+}
+
+function closeMemberDetail(){document.getElementById('memberDetailModal').style.display='none';renderMgrOverview();}
+
+function saveManagerNote(userId){
+  const text=document.getElementById('mgrNoteText').value.trim();if(!text)return;
+  const flag=document.getElementById('mgrNoteFlag').value;
+  const notes=lsGet('manager_notes',{});if(!notes[userId])notes[userId]=[];
+  notes[userId].push({id:uid(),text:text,flag:flag,createdAt:new Date().toISOString()});
+  lsSet('manager_notes',notes);toast('Note saved');openMemberDetail(userId);
+}
+
+// ─── MGR: ALL COMMENTS ───
+function renderMgrComments(){
+  const panel=document.getElementById('mgrComments');
+  const users=lsGet('users',[]);const members=users.filter(u=>u.role==='member');
+  const progress=lsGet('progress',{});
+  let comments=[];
+  members.forEach(u=>{
+    const up=progress[u.id]||{};
+    Object.entries(up).forEach(([day,dp])=>{
+      if(dp.comment){const lesson=CURRICULUM.find(c=>c.day===parseInt(day));
+        comments.push({member:u.name,memberId:u.id,day:parseInt(day),title:lesson?lesson.title:'',comment:dp.comment,date:dp.completedAt||''});}
+    });
+  });
+  comments.sort((a,b)=>new Date(b.date||0)-new Date(a.date||0));
+
+  let html=`<div class="filter-row"><label>Filter by member</label><select id="commentFilter" onchange="filterComments()"><option value="">All members</option>`;
+  members.forEach(u=>{html+=`<option value="${u.id}">${escHtml(u.name)}</option>`;});
+  html+=`</select></div>`;
+
+  if(!comments.length){html+=`<div class="empty-state">No comments yet</div>`;panel.innerHTML=html;return;}
+  html+=`<table class="data-table" id="commentsTable"><thead><tr><th>Member</th><th>Day</th><th>Session</th><th>Comment</th><th>Date</th></tr></thead><tbody>`;
+  comments.forEach(c=>{
+    html+=`<tr data-member="${c.memberId}"><td>${escHtml(c.member)}</td><td>${c.day}</td><td>${escHtml(c.title)}</td><td>${escHtml(c.comment)}</td><td>${fmtDate(c.date)}</td></tr>`;
+  });
+  html+=`</tbody></table>`;panel.innerHTML=html;
+}
+
+function filterComments(){
+  const val=document.getElementById('commentFilter').value;
+  document.querySelectorAll('#commentsTable tbody tr').forEach(tr=>{
+    tr.style.display=(!val||tr.dataset.member===val)?'':'none';
+  });
+}
+
+// ─── MGR: ALL RESOURCES ───
+function renderMgrResources(){
+  const panel=document.getElementById('mgrResources');
+  const users=lsGet('users',[]);const members=users.filter(u=>u.role==='member');
+  const resources=lsGet('resources',[]).sort((a,b)=>new Date(b.addedAt)-new Date(a.addedAt));
+
+  let html=`<div class="filter-row">
+    <label>Filter by member</label><select id="resFilterMember" onchange="filterMgrResources()"><option value="">All members</option>`;
+  members.forEach(u=>{html+=`<option value="${u.id}">${escHtml(u.name)}</option>`;});
+  html+=`</select><label>Filter by week</label><select id="resFilterWeek" onchange="filterMgrResources()"><option value="">All weeks</option><option value="1">Week 1</option><option value="2">Week 2</option><option value="3">Week 3</option><option value="4">Week 4</option></select></div>`;
+
+  if(!resources.length){html+=`<div class="empty-state">No resources shared yet</div>`;panel.innerHTML=html;return;}
+  html+=`<table class="data-table" id="mgrResTable"><thead><tr><th>Member</th><th>Day</th><th>Title</th><th>Date</th></tr></thead><tbody>`;
+  resources.forEach(r=>{
+    const lesson=CURRICULUM.find(c=>c.day===r.day);const week=lesson?lesson.week:0;
+    html+=`<tr data-member="${r.userId}" data-week="${week}"><td>${escHtml(r.userName)}</td><td>${r.day}</td><td><a href="${escHtml(r.url)}" target="_blank">${escHtml(r.title)}</a></td><td>${fmtDate(r.addedAt)}</td></tr>`;
+  });
+  html+=`</tbody></table>`;panel.innerHTML=html;
+}
+
+function filterMgrResources(){
+  const member=document.getElementById('resFilterMember').value;
+  const week=document.getElementById('resFilterWeek').value;
+  document.querySelectorAll('#mgrResTable tbody tr').forEach(tr=>{
+    const mMatch=!member||tr.dataset.member===member;
+    const wMatch=!week||tr.dataset.week===week;
+    tr.style.display=(mMatch&&wMatch)?'':'none';
+  });
+}
+
+// ─── MGR: EXPORT & SETTINGS ───
+function renderMgrExport(){
+  const panel=document.getElementById('mgrExport');
+  panel.innerHTML=`
+    <div class="card" style="margin-bottom:16px">
+      <h3 style="margin-bottom:12px">Data export</h3>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn-primary" onclick="exportJSON()">Export team data as JSON</button>
+        <button onclick="exportCSV()">Export summary as CSV</button>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <h3 style="margin-bottom:12px">Data import</h3>
+      <p style="font-size:13px;color:var(--color-text-secondary);margin-bottom:8px">Import will overwrite all current data.</p>
+      <input type="file" id="importFileInput" accept=".json" style="font-size:13px" onchange="importJSON(this)">
+    </div>
+    <div class="danger-zone">
+      <h3>Danger zone</h3>
+      <p style="font-size:13px;color:var(--color-text-secondary);margin-bottom:10px">This will permanently delete all team data. Type RESET to confirm.</p>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <input type="text" id="resetConfirmInput" placeholder='Type "RESET"' style="max-width:160px">
+        <button class="btn-danger" onclick="resetAllData()">Reset all data</button>
+      </div>
+    </div>`;
+}
+
+function exportJSON(){
+  const data={};
+  const keys=['team_name','users','progress','resources','manager_notes','start_date','last_export'];
+  keys.forEach(k=>{const v=lsGetRaw(k);if(v!==null)data[k]=v;});
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  const dateStr=new Date().toISOString().slice(0,10);
+  a.href=url;a.download=`drone_progress_export_${dateStr}.json`;a.click();
+  URL.revokeObjectURL(url);
+  lsSetRaw('last_export',new Date().toISOString());
+  renderBackupBanner();toast('Export downloaded');
+}
+
+function exportCSV(){
+  const users=lsGet('users',[]);const members=users.filter(u=>u.role==='member');
+  const progress=lsGet('progress',{});
+  let csv='Member,Day,Title,Completed,CompletedAt,Comment,ProofLink\n';
+  members.forEach(u=>{
+    const up=progress[u.id]||{};
+    CURRICULUM.forEach(lesson=>{
+      const dp=up[lesson.day]||{};
+      const row=[u.name,lesson.day,'"'+lesson.title.replace(/"/g,'""')+'"',dp.completed?'Yes':'No',dp.completedAt||'','"'+(dp.comment||'').replace(/"/g,'""')+'"',dp.proofLink||''];
+      csv+=row.join(',')+'\n';
+    });
+  });
+  const blob=new Blob([csv],{type:'text/csv'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download=`drone_summary_${new Date().toISOString().slice(0,10)}.csv`;a.click();
+  URL.revokeObjectURL(url);toast('CSV downloaded');
+}
+
+function importJSON(input){
+  const file=input.files[0];if(!file)return;
+  if(!confirm('This will overwrite all current data. Continue?'))return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      const data=JSON.parse(e.target.result);
+      Object.entries(data).forEach(([k,v])=>{
+        try{localStorage.setItem('drone_'+k,typeof v==='string'?v:JSON.stringify(v));}catch(err){}
+      });
+      toast('Data imported successfully');init();
+    }catch(err){toast('Invalid JSON file');}
+  };
+  reader.readAsText(file);
+}
+
+function resetAllData(){
+  const val=document.getElementById('resetConfirmInput').value.trim();
+  if(val!=='RESET'){toast('Type RESET to confirm');return;}
+  const keysToRemove=[];
+  for(let i=0;i<localStorage.length;i++){
+    const k=localStorage.key(i);if(k&&k.startsWith('drone_'))keysToRemove.push(k);
+  }
+  keysToRemove.forEach(k=>{try{localStorage.removeItem(k);}catch(e){}});
+  currentUser=null;selectedLoginUser=null;expandedDay=null;
+  toast('All data has been reset');init();
+}
+
+// ─── INIT ───
+function init(){
+  const users=lsGet('users',null);
+  if(!users){showView('viewSetup');renderSetup();}
+  else{showView('viewLogin');renderLogin();}
+}
+init();
+</script>
+</body>
+</html>
