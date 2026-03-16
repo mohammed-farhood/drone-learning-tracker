@@ -371,14 +371,121 @@ const SAMPLE_TEAM={name:"Alpha Squad",users:[
 {id:"mgr",name:"Manager",pin:"0000",role:"manager"}
 ]};
 
-// ─── LOCALSTORAGE HELPERS ───
+// ─── LOCALSTORAGE & SERVER SYNC ───
 let lsAvailable=true;
+
+// Client ID for Server-Sent Events (prevents reflecting our own updates)
+const clientId = 'c_' + Date.now().toString(36) + Math.random().toString(36).slice(2);
+let serverConnected = false;
+let syncTimeout = null;
+
+// Normal localStorage reads
 function lsGet(key,fallback){try{const v=localStorage.getItem('drone_'+key);return v?JSON.parse(v):fallback;}catch(e){return fallback;}}
-function lsSet(key,val){try{localStorage.setItem('drone_'+key,JSON.stringify(val));}catch(e){}}
 function lsGetRaw(key){try{return localStorage.getItem('drone_'+key);}catch(e){return null;}}
-function lsSetRaw(key,val){try{localStorage.setItem('drone_'+key,val);}catch(e){}}
-function lsRemove(key){try{localStorage.removeItem('drone_'+key);}catch(e){}}
+
+// Writes go to localStorage immediately, then queue a server sync
+function lsSet(key,val){
+  try{localStorage.setItem('drone_'+key,JSON.stringify(val));}catch(e){}
+  queueServerSync();
+}
+function lsSetRaw(key,val){
+  try{localStorage.setItem('drone_'+key,val);}catch(e){}
+  queueServerSync();
+}
+function lsRemove(key){
+  try{localStorage.removeItem('drone_'+key);}catch(e){}
+  queueServerSync();
+}
+
 (function checkLS(){try{localStorage.setItem('drone__test','1');localStorage.removeItem('drone__test');}catch(e){lsAvailable=false;const w=document.createElement('div');w.className='ls-warning';w.textContent='localStorage is not available. Data cannot be saved.';document.body.prepend(w);}})();
+
+// ─── SERVER SYNC LOGIC ───
+// Push all drone_ keys to the server
+async function queueServerSync() {
+  if (!serverConnected) return; // Only sync if server is known to be alive
+  
+  clearTimeout(syncTimeout);
+  syncTimeout = setTimeout(async () => {
+    const payload = {};
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && k.startsWith('drone_')) {
+        const raw = localStorage.getItem(k);
+        const shortKey = k.replace('drone_', '');
+        try {
+          // Send objects as objects, strings as strings
+          payload[shortKey] = raw.startsWith('{') || raw.startsWith('[') ? JSON.parse(raw) : raw;
+        } catch(e) {
+          payload[shortKey] = raw;
+        }
+      }
+    }
+    
+    try {
+      await fetch(`/api/data?clientId=${clientId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+    } catch(e) {
+      console.warn('Sync failed. Will retry on next change.');
+    }
+  }, 500); // 500ms debounce
+}
+
+// Start SSE connection and initial data load
+async function connectToServer() {
+  try {
+    // 1. Try to fetch initial state from server
+    const res = await fetch('/api/data');
+    if (res.ok) {
+      serverConnected = true;
+      const serverData = await res.json();
+      
+      // If server has data, overwrite local (server is source of truth)
+      if (Object.keys(serverData).length > 0) {
+        Object.entries(serverData).forEach(([k, v]) => {
+          localStorage.setItem('drone_' + k, typeof v === 'object' ? JSON.stringify(v) : v);
+        });
+      }
+      // If server is empty but local has data (first run), push local to server
+      else if (Object.keys(serverData).length === 0 && localStorage.length > 0) {
+        queueServerSync();
+      }
+    }
+  } catch(e) {
+    console.warn('No server found. Running in offline/local mode.');
+    serverConnected = false;
+  }
+
+  // 2. Connect to SSE for live updates
+  if (serverConnected) {
+    const evtSource = new EventSource(`/api/events?clientId=${clientId}`);
+    evtSource.onmessage = function(event) {
+      const msg = JSON.parse(event.data);
+      if (msg.type === 'sync' && msg.data) {
+        // Apply remote changes
+        Object.entries(msg.data).forEach(([k, v]) => {
+          localStorage.setItem('drone_' + k, typeof v === 'object' ? JSON.stringify(v) : v);
+        });
+        
+        // Re-render current view to show new data
+        if (currentUser) {
+          if (currentUser.role === 'manager') renderManagerDashboard();
+          else renderMemberDashboard();
+        } else {
+          init();
+        }
+        
+        toast('Data synced from server');
+      }
+    };
+    evtSource.onerror = function() {
+      console.warn('SSE connection lost.');
+      serverConnected = false;
+    };
+  }
+}
 
 // ─── STATE ───
 let currentUser=null;
@@ -984,7 +1091,7 @@ function importJSON(input){
     try{
       const data=JSON.parse(e.target.result);
       Object.entries(data).forEach(([k,v])=>{
-        try{localStorage.setItem('drone_'+k,typeof v==='string'?v:JSON.stringify(v));}catch(err){}
+        lsSetRaw(k, typeof v==='string'?v:JSON.stringify(v));
       });
       toast('Data imported successfully');init();
     }catch(err){toast('Invalid JSON file');}
@@ -1000,12 +1107,14 @@ function resetAllData(){
     const k=localStorage.key(i);if(k&&k.startsWith('drone_'))keysToRemove.push(k);
   }
   keysToRemove.forEach(k=>{try{localStorage.removeItem(k);}catch(e){}});
+  queueServerSync();
   currentUser=null;selectedLoginUser=null;expandedDay=null;
   toast('All data has been reset');init();
 }
 
 // ─── INIT ───
-function init(){
+async function init(){
+  if (!serverConnected) await connectToServer();
   const users=lsGet('users',null);
   if(!users){showView('viewSetup');renderSetup();}
   else{showView('viewLogin');renderLogin();}
