@@ -37,17 +37,74 @@ app.get('/api/data', (req, res) => {
 app.post('/api/data', (req, res) => {
   try {
     const newData = req.body;
-    fs.writeFileSync(DB_PATH, JSON.stringify(newData, null, 2));
+    let currentData = {};
+    if (fs.existsSync(DB_PATH)) {
+      try { currentData = JSON.parse(fs.readFileSync(DB_PATH, 'utf8')); } catch(e){}
+    }
+
+    const mergedData = { ...currentData };
+
+    if (newData.team_name && !mergedData.team_name) mergedData.team_name = newData.team_name;
+    if (newData.start_date && !mergedData.start_date) mergedData.start_date = newData.start_date;
+
+    if (newData.users && Array.isArray(newData.users)) {
+      let usersMap = new Map();
+      (mergedData.users || []).forEach(u => usersMap.set(u.id, u));
+      newData.users.forEach(u => usersMap.set(u.id, u));
+      mergedData.users = Array.from(usersMap.values());
+    }
+
+    if (newData.resources && Array.isArray(newData.resources)) {
+      let resMap = new Map();
+      (mergedData.resources || []).forEach(r => resMap.set(r.id, r));
+      newData.resources.forEach(r => resMap.set(r.id, r));
+      mergedData.resources = Array.from(resMap.values());
+    }
+
+    if (newData.manager_notes) {
+      if (!mergedData.manager_notes) mergedData.manager_notes = {};
+      Object.keys(newData.manager_notes).forEach(userId => {
+        let notesMap = new Map();
+        (mergedData.manager_notes[userId] || []).forEach(n => notesMap.set(n.id, n));
+        (newData.manager_notes[userId] || []).forEach(n => notesMap.set(n.id, n));
+        mergedData.manager_notes[userId] = Array.from(notesMap.values());
+      });
+    }
+
+    if (newData.progress) {
+      if (!mergedData.progress) mergedData.progress = {};
+      Object.keys(newData.progress).forEach(userId => {
+        if (!mergedData.progress[userId]) mergedData.progress[userId] = {};
+        
+        Object.keys(newData.progress[userId]).forEach(day => {
+          const clientDay = newData.progress[userId][day];
+          const serverDay = mergedData.progress[userId][day];
+          
+          if (!serverDay) {
+            mergedData.progress[userId][day] = clientDay;
+          } else {
+            const clientTime = new Date(clientDay.updatedAt || clientDay.completedAt || 0).getTime();
+            const serverTime = new Date(serverDay.updatedAt || serverDay.completedAt || 0).getTime();
+            
+            if (clientTime > serverTime) {
+              mergedData.progress[userId][day] = clientDay;
+            }
+          }
+        });
+      });
+    }
+
+    fs.writeFileSync(DB_PATH, JSON.stringify(mergedData, null, 2));
     
     // Broadcast change to all clients EXCEPT the sender
     const senderId = req.query.clientId;
     clients.forEach(client => {
       if (client.id !== senderId) {
-        client.res.write(`data: ${JSON.stringify({ type: 'sync', data: newData })}\n\n`);
+        client.res.write(`data: ${JSON.stringify({ type: 'sync', data: mergedData })}\n\n`);
       }
     });
 
-    res.json({ success: true });
+    res.json({ success: true, mergedData });
   } catch (err) {
     console.error('Error writing DB:', err);
     res.status(500).json({ error: 'Failed to write database' });

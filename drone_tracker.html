@@ -422,11 +422,21 @@ async function queueServerSync() {
     }
     
     try {
-      await fetch(`/api/data?clientId=${clientId}`, {
+      const response = await fetch(`/api/data?clientId=${clientId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
+      const result = await response.json();
+      if (result.mergedData) {
+        Object.entries(result.mergedData).forEach(([k, v]) => {
+          localStorage.setItem('drone_' + k, typeof v === 'object' ? JSON.stringify(v) : v);
+        });
+        if (currentUser) {
+          if (currentUser.role === 'manager') renderManagerDashboard();
+          else renderDaysList(); // Only re-render days list to maintain tab state
+        }
+      }
     } catch(e) {
       console.warn('Sync failed. Will retry on next change.');
     }
@@ -766,6 +776,7 @@ function toggleDay(day,checked){
   if(!checked&&dp.completed){if(!confirm('Mark Day '+day+' as incomplete? Your notes will be kept.'))
     {renderDaysList();return;}}
   dp.completed=checked;dp.completedAt=checked?new Date().toISOString():null;
+  dp.updatedAt=new Date().toISOString();
   progress[currentUser.id][day]=dp;lsSet('progress',progress);
   renderMemberHero();renderDaysList();
   toast(checked?'Day '+day+' completed!':'Day '+day+' marked incomplete');
@@ -776,7 +787,9 @@ function saveComment(day,val){
   const progress=lsGet('progress',{});
   if(!progress[currentUser.id])progress[currentUser.id]={};
   if(!progress[currentUser.id][day])progress[currentUser.id][day]={completed:false,completedAt:null,comment:'',proofLink:'',proofLabel:''};
-  progress[currentUser.id][day].comment=val;lsSet('progress',progress);toast('Notes saved');
+  progress[currentUser.id][day].comment=val;
+  progress[currentUser.id][day].updatedAt=new Date().toISOString();
+  lsSet('progress',progress);toast('Notes saved');
 }
 
 function saveProof(day){
@@ -787,6 +800,7 @@ function saveProof(day){
   if(!progress[currentUser.id])progress[currentUser.id]={};
   if(!progress[currentUser.id][day])progress[currentUser.id][day]={completed:false,completedAt:null,comment:'',proofLink:'',proofLabel:''};
   progress[currentUser.id][day].proofLink=link;progress[currentUser.id][day].proofLabel=label;
+  progress[currentUser.id][day].updatedAt=new Date().toISOString();
   lsSet('progress',progress);renderDaysList();toast('Proof saved');
 }
 
