@@ -387,6 +387,23 @@ const SAMPLE_TEAM={name:"Alpha Squad",users:[
 ]};
 
 // ─── LOCALSTORAGE & SERVER SYNC ───
+// Migration: Move old drone_ data to penguin_ if found
+(function migrateData(){
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('drone_')) {
+        const newKey = key.replace('drone_', 'penguin_');
+        // Only migrate if destination doesn't exist yet to avoid overwriting newer data
+        if (!localStorage.getItem(newKey)) {
+          localStorage.setItem(newKey, localStorage.getItem(key));
+          console.log(`Migrated ${key} to ${newKey}`);
+        }
+      }
+    }
+  } catch(e) { console.warn('Migration failed', e); }
+})();
+
 let lsAvailable=true;
 
 // Client ID for Server-Sent Events (prevents reflecting our own updates)
