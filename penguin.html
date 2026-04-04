@@ -248,6 +248,9 @@ button:hover { background: var(--color-bg-secondary); }
     <div class="logo">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
       Penguin Tracker
+      <div id="cloudStatus" style="margin-left: 10px; display: none;">
+        <span id="cloudStatusIcon" style="color: #ccc; font-size: 10px; cursor: help;" title="Cloud Sync Status">●</span>
+      </div>
     </div>
     <div class="user-info" id="navUserInfo"></div>
   </nav>
@@ -422,10 +425,12 @@ function lsGetRaw(key){try{return localStorage.getItem('penguin_'+key);}catch(e)
 // Writes go to localStorage immediately, then queue a server sync
 function lsSet(key,val){
   try{localStorage.setItem('penguin_'+key,JSON.stringify(val));}catch(e){}
+  console.log(`[lsSet] Updated ${key}`, val);
   queueServerSync();
 }
 function lsSetRaw(key,val){
   try{localStorage.setItem('penguin_'+key,val);}catch(e){}
+  console.log(`[lsSetRaw] Updated ${key}`, val);
   queueServerSync();
 }
 function lsRemove(key){
@@ -481,27 +486,35 @@ async function queueServerSync() {
 
 // Start SSE connection and initial data load
 async function connectToServer() {
+  console.log("Attempting to connect to Cloud at:", API_BASE);
+  const statusEl = document.getElementById('cloudStatusIcon');
+  if (statusEl) statusEl.style.color = '#ffa500'; // Orange (connecting)
+
   try {
     // 1. Try to fetch initial state from server
     const res = await fetch(API_BASE + '/api/data');
     if (res.ok) {
       serverConnected = true;
       const serverData = await res.json();
+      console.log("Server data received:", serverData);
       
       // If server has data, overwrite local (server is source of truth)
-      if (Object.keys(serverData).length > 0) {
+      if (serverData && Object.keys(serverData).length > 2) { // More than just default keys
         Object.entries(serverData).forEach(([k, v]) => {
           localStorage.setItem('penguin_' + k, typeof v === 'object' ? JSON.stringify(v) : v);
         });
+        if (statusEl) statusEl.style.color = '#4CAF50'; // Green (connected)
+        toast('🚀 Data restored from Cloud!');
       }
       // If server is empty but local has data (first run), push local to server
-      else if (Object.keys(serverData).length === 0 && localStorage.length > 0) {
+      else if ((!serverData || Object.keys(serverData).length === 0) && localStorage.length > 0) {
         queueServerSync();
       }
     }
   } catch(e) {
-    console.warn('No server found. Running in offline/local mode.');
+    console.warn('Cloud connection failed. Falling back to local data.', e);
     serverConnected = false;
+    if (statusEl) statusEl.style.color = '#f44336'; // Red (error)
   }
 
   // 2. Connect to SSE for live updates
@@ -1264,8 +1277,28 @@ function resetAllData(){
 
 // ─── INIT ───
 async function init(){
+  const statusEl = document.getElementById('cloudStatusIcon');
+  if (statusEl) statusEl.style.display = isGitHubPages ? 'inline-block' : 'none';
+
   if (!serverConnected) await connectToServer();
+  
+  // Verify if we are seeing sample data. If so, and we have drone data, force re-migrate.
   const users=lsGet('users',null);
+  const isSampleData = users && users.some(u => u.name === 'John Doe');
+  
+  if (isSampleData) {
+     console.log("Sample data detected. Attempting to recover real data...");
+     // Clear penguin data and re-run migration
+     const keysToRemove=[];
+     for(let i=0;i<localStorage.length;i++){
+       const k=localStorage.key(i);if(k&&k.startsWith('penguin_'))keysToRemove.push(k);
+     }
+     keysToRemove.forEach(k=>localStorage.removeItem(k));
+     // Refresh page to trigger clean migration
+     window.location.reload();
+     return;
+  }
+
   if(!users){showView('viewSetup');renderSetup();}
   else{showView('viewLogin');renderLogin();}
 }
