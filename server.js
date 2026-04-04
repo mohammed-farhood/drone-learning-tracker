@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 const DB_PATH = path.join(__dirname, 'data', 'db.json');
 
 app.use(cors());
@@ -59,6 +59,13 @@ app.post('/api/data', (req, res) => {
       (mergedData.resources || []).forEach(r => resMap.set(r.id, r));
       newData.resources.forEach(r => resMap.set(r.id, r));
       mergedData.resources = Array.from(resMap.values());
+    }
+
+    if (newData.announcements && Array.isArray(newData.announcements)) {
+      let annMap = new Map();
+      (mergedData.announcements || []).forEach(a => annMap.set(a.id, a));
+      newData.announcements.forEach(a => annMap.set(a.id, a));
+      mergedData.announcements = Array.from(annMap.values());
     }
 
     if (newData.manager_notes) {
@@ -131,14 +138,17 @@ app.get('/api/events', (req, res) => {
   });
 });
 
-app.listen(PORT, () => {
+const HOST = '0.0.0.0'; 
+app.listen(PORT, HOST, () => {
   console.log(`\n===========================================`);
-  console.log(`🚀 Drone Learning Tracker Server Running!`);
+  console.log(`🚀 Penguin Tracker Server Running!`);
   console.log(`===========================================\n`);
   console.log(`Access on this computer: http://localhost:${PORT}`);
-  console.log(`\nTo share securely over the internet:`);
-  console.log(`1. Run this command in another terminal: ngrok http ${PORT}`);
-  console.log(`2. Send the funny-looking ngrok link to your team.`);
+  console.log(`Access over Tailscale: http://100.104.114.34:${PORT}`);
+  console.log(`\nIMPORTANT for users:`);
+  console.log(`1. Ensure Tailscale is "Connected".`);
+  console.log(`2. Use EXACTLY: http://100.104.114.34:${PORT}`);
+  console.log(`3. MUST use 'http', not 'https'.`);
   console.log(`\nData is saved to: ${DB_PATH}`);
   console.log(`===========================================\n`);
 });

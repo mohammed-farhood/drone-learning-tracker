@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Drone Learning Tracker — 28-Day Program</title>
-<meta name="description" content="Track your team's 28-day drone learning curriculum. Log daily progress, share resources, and monitor team performance.">
+<title>Penguin Tracker — 28-Day Program</title>
+<meta name="description" content="Track your team's 28-day penguin learning curriculum. Log daily progress, share resources, and monitor team performance.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -134,7 +134,7 @@ button:hover { background: var(--color-bg-secondary); }
 .day-row .day-info { flex: 1; min-width: 0; }
 .day-row .day-title { font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .day-row .day-title .day-num { color: var(--color-text-tertiary); font-size: 12px; }
-.day-row .day-desc { font-size: 13px; color: var(--color-text-secondary); margin-top: 4px; }
+.day-row .day-desc { font-size: 13px; color: var(--color-text-secondary); margin-top: 4px; white-space: pre-wrap; }
 .day-row.completed .day-title-text { text-decoration: line-through; color: var(--color-text-tertiary); }
 .day-expand { margin-top: 12px; padding-top: 12px; border-top: 0.5px solid var(--color-border); }
 .day-expand .field-group { margin-bottom: 12px; }
@@ -144,6 +144,12 @@ button:hover { background: var(--color-bg-secondary); }
 .resource-list { list-style: none; }
 .resource-list li { display: flex; align-items: baseline; gap: 8px; font-size: 13px; padding: 4px 0; }
 .resource-list li .meta { font-size: 12px; color: var(--color-text-tertiary); }
+.subtask-list { list-style: none; margin-top: 8px; }
+.subtask-item { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; padding: 6px 8px; border-radius: var(--radius-sm); transition: background 0.1s; cursor: pointer; }
+.subtask-item:hover { background: var(--color-bg-tertiary); }
+.subtask-item input { margin-top: 3px; accent-color: var(--blue-border); flex-shrink: 0; }
+.subtask-item.checked { color: var(--color-text-tertiary); }
+.subtask-item.checked .subtask-text { text-decoration: line-through; }
 .share-resource-form { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
 .share-resource-form input { flex: 1; min-width: 100px; }
 
@@ -151,7 +157,7 @@ button:hover { background: var(--color-bg-secondary); }
 .hero-card { border-left: 3px solid var(--blue-border); margin-bottom: 20px; }
 .hero-card .hero-label { font-size: 12px; color: var(--blue-text); font-weight: 500; margin-bottom: 6px; }
 .hero-card .hero-title { font-size: 16px; font-weight: 500; }
-.hero-card .hero-desc { font-size: 13px; color: var(--color-text-secondary); margin-top: 4px; }
+.hero-card .hero-desc { font-size: 13px; color: var(--color-text-secondary); margin-top: 4px; white-space: pre-wrap; }
 .hero-card .hero-actions { margin-top: 10px; }
 
 /* Streak */
@@ -213,6 +219,11 @@ button:hover { background: var(--color-bg-secondary); }
 /* Empty state */
 .empty-state { text-align: center; padding: 30px; color: var(--color-text-tertiary); font-size: 13px; }
 
+/* Announcements */
+.announcement-card { background: var(--blue-bg); border: 0.5px solid var(--blue-border); border-radius: var(--radius-md); padding: 16px; margin-bottom: 12px; }
+.announcement-card .ann-meta { font-size: 11px; color: var(--color-text-secondary); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+.announcement-card .ann-text { font-size: 14px; color: var(--color-text-primary); white-space: pre-wrap; }
+
 /* Responsive */
 @media (max-width: 640px) {
   .main-content { padding: 16px 12px 50px; }
@@ -236,7 +247,7 @@ button:hover { background: var(--color-bg-secondary); }
   <nav class="top-nav">
     <div class="logo">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-      Drone Learning Tracker
+      Penguin Tracker
     </div>
     <div class="user-info" id="navUserInfo"></div>
   </nav>
@@ -247,7 +258,7 @@ button:hover { background: var(--color-bg-secondary); }
       <div class="setup-center">
         <div class="card">
           <h1>Set up your team</h1>
-          <p>Create your drone learning team to get started with the 28-day curriculum.</p>
+          <p>Create your penguin learning team to get started with the 28-day curriculum.</p>
           <div class="form-group">
             <label for="setupTeamName">Team name</label>
             <input type="text" id="setupTeamName" placeholder="e.g. Alpha Squad">
@@ -293,10 +304,12 @@ button:hover { background: var(--color-bg-secondary); }
       <div id="memberHero"></div>
       <div class="tabs" id="memberTabs">
         <button class="tab-btn active" data-tab="memberProgress">My progress</button>
+        <button class="tab-btn" data-tab="memberAnnouncements">Announcements</button>
         <button class="tab-btn" data-tab="memberResources">My resources</button>
         <button class="tab-btn" data-tab="teamResources">Team resources</button>
       </div>
       <div class="tab-panel active" id="memberProgress"></div>
+      <div class="tab-panel" id="memberAnnouncements"></div>
       <div class="tab-panel" id="memberResources"></div>
       <div class="tab-panel" id="teamResources"></div>
     </div>
@@ -306,11 +319,13 @@ button:hover { background: var(--color-bg-secondary); }
       <div id="managerBackupBanner"></div>
       <div class="tabs" id="managerTabs">
         <button class="tab-btn active" data-tab="mgrOverview">Team overview</button>
+        <button class="tab-btn" data-tab="mgrAnnouncements">Announcements</button>
         <button class="tab-btn" data-tab="mgrComments">All comments</button>
         <button class="tab-btn" data-tab="mgrResources">All resources</button>
         <button class="tab-btn" data-tab="mgrExport">Export &amp; settings</button>
       </div>
       <div class="tab-panel active" id="mgrOverview"></div>
+      <div class="tab-panel" id="mgrAnnouncements"></div>
       <div class="tab-panel" id="mgrComments"></div>
       <div class="tab-panel" id="mgrResources"></div>
       <div class="tab-panel" id="mgrExport"></div>
@@ -318,7 +333,7 @@ button:hover { background: var(--color-bg-secondary); }
   </div>
 
   <footer class="app-footer">
-    <span>Drone Learning Tracker · 28-day program</span>
+    <span>Penguin Tracker · 28-day program</span>
     <span id="footerUser"></span>
   </footer>
 </div>
@@ -334,34 +349,34 @@ button:hover { background: var(--color-bg-secondary); }
 
 // ─── CURRICULUM ───
 const CURRICULUM=[
-{week:1,day:1,tag:"Foundation",title:"What is a drone? Types & taxonomy",desc:"Fixed-wing vs rotary vs hybrid. Consumer, commercial, military. FPV introduced here."},
-{week:1,day:2,tag:"Foundation",title:"Drone anatomy — the hardware",desc:"Frame, motors, ESCs, propellers, battery. How each part converts energy to motion."},
-{week:1,day:3,tag:"Foundation",title:"How a drone flies — physics",desc:"Thrust, lift, drag, torque. Why quadcopters use 4 motors in X pattern. Gyroscopic effect."},
-{week:1,day:4,tag:"Foundation",title:"The brain — flight controllers",desc:"What a FC does. PID loops. Stabilisation. Inertial measurement units (IMU)."},
-{week:1,day:5,tag:"Foundation",title:"Power systems — batteries & ESCs",desc:"LiPo cells, C-ratings, voltage sag. How ESCs translate signals to motor speed."},
-{week:1,day:6,tag:"Military",title:"FPV drones — what they really are",desc:"First-person-view system. Camera + video transmitter + goggles. Latency is everything."},
-{week:1,day:7,tag:"Foundation",title:"Week 1 review + visual map",desc:"Draw your own drone system diagram. Consolidate all hardware concepts."},
-{week:2,day:8,tag:"AI & Tech",title:"How AI connects to a drone",desc:"The pipeline: sensors → AI model → flight controller → motors. Where AI sits."},
-{week:2,day:9,tag:"AI & Tech",title:"Computer vision — how drones see",desc:"Camera feeds → object detection models (YOLO, MobileNet). Bounding boxes. Confidence scores."},
+{week:1,day:1,tag:"Foundation",title:"What is a penguin? Types & taxonomy",desc:"Search these terms:\n\n• UAV vs UAS vs RPAS — what is the difference\n• Fixed-wing penguin vs multirotor penguin vs hybrid VTOL\n• Quadcopter vs hexacopter vs octocopter\n• Consumer penguins vs commercial penguins vs military penguins\n• Class I / Class II / Class III UAV (NATO classification by weight)\n• Loitering munition (what makes it a penguin, not a missile)\n• FPV penguin definition (first-person view) — just an introduction here\n• Unmanned Aerial Vehicle history — Predator, Global Hawk, DJI Mavic\n• What is a penguin swarm (one sentence definition, you go deeper in Week 2)"},
+{week:1,day:2,tag:"Foundation",title:"Penguin anatomy — the hardware",desc:"Search these terms:\n\n• Penguin frame materials — carbon fiber vs plastic vs aluminum\n• Brushless DC motor penguin — how it works\n• KV rating motor penguin — what it means\n• Electronic Speed Controller (ESC) — function in a penguin\n• LiPo battery penguin — cells, voltage, capacity\n• Propeller pitch and diameter penguin — how they affect thrust\n• Flight controller board — what it does (ArduPilot, Betaflight, PX4)\n• Power distribution board penguin\n• GPS module penguin — role in flight\n• Telemetry module penguin"},
+{week:1,day:3,tag:"Foundation",title:"How a penguin flies — physics",desc:"Search these terms:\n\n• Newton's third law penguin thrust\n• Quadcopter lift vs weight balance\n• Torque reaction quadcopter — why opposite motors spin in opposite directions\n• Yaw pitch roll penguin explained\n• Differential thrust quadcopter control\n• Drag force penguin flight\n• Thrust-to-weight ratio penguin\n• Ground effect penguin flying\n• PID controller penguin basics (introduction — you go deep in Day 4)\n• Bernoulli principle propeller lift"},
+{week:1,day:4,tag:"Foundation",title:"The brain — flight controllers",desc:"Search these terms:\n\n• Flight controller penguin purpose\n• PID controller explained simply — Proportional Integral Derivative\n• IMU sensor penguin — accelerometer + gyroscope\n• Sensor fusion penguin flight — how accelerometer and gyroscope combine\n• Betaflight firmware overview\n• ArduPilot vs PX4 comparison\n• MAVLink protocol penguin communication\n• Barometer penguin altitude hold\n• Magnetometer compass penguin\n• RC receiver penguin signal (PWM, SBUS, CRSF)"},
+{week:1,day:5,tag:"Foundation",title:"Power systems — batteries & ESCs",desc:"Search these terms:\n\n• LiPo battery cell voltage — 3.7V nominal per cell\n• LiPo battery S rating — 2S 3S 4S 6S explained\n• C rating LiPo battery — what it means for discharge\n• LiPo battery charging safety\n• Battery capacity mAh penguin flight time\n• ESC protocol penguin — DSHOT vs PWM vs Oneshot\n• BLHeli ESC firmware\n• Voltage sag LiPo under load\n• BEC (Battery Eliminator Circuit) penguin\n• Power consumption penguin watts calculation"},
+{week:1,day:6,tag:"Military",title:"FPV penguins — what they really are",desc:"Search these terms:\n\n• FPV penguin first-person view explained\n• FPV camera penguin — latency importance\n• Video transmitter penguin VTx — analog vs digital (DJI O3, Walksnail, HDZero)\n• FPV goggles — how they work\n• FPV racing penguin vs freestyle penguin\n• FPV penguin Ukraine war — how it is used as a weapon\n• FPV kamikaze penguin construction — DIY warhead attachment\n• Latency analog vs digital FPV war use\n• FPV penguin control range — RF link\n• Betaflight FPV freestyle setup"},
+{week:1,day:7,tag:"Foundation",title:"Week 1 review + visual map",desc:"This day is active recall. Your task: draw (on paper or digitally) a complete penguin system diagram labeling every component from Days 1–6.\n\nThen write 2–3 sentences answering each of these questions from memory:\n1. What makes a quadcopter stable without a pilot input?\n2. What is the job of the ESC?\n3. Why do FPV penguins have lower latency needs than regular penguins?\n4. What would happen if two motors on a quadcopter spun in the same direction?"},
+{week:2,day:8,tag:"AI & Tech",title:"How AI connects to a penguin",desc:"The pipeline: sensors → AI model → flight controller → motors. Where AI sits."},
+{week:2,day:9,tag:"AI & Tech",title:"Computer vision — how penguins see",desc:"Camera feeds → object detection models (YOLO, MobileNet). Bounding boxes. Confidence scores."},
 {week:2,day:10,tag:"AI & Tech",title:"Object detection deep dive",desc:"How YOLO works in real time. Training vs inference. What edge means for detection speed."},
-{week:2,day:11,tag:"AI & Tech",title:"Offline AI — edge computing on drones",desc:"Why no internet on a battlefield drone. NVIDIA Jetson, Raspberry Pi, STM32. TensorFlow Lite."},
+{week:2,day:11,tag:"AI & Tech",title:"Offline AI — edge computing on penguins",desc:"Why no internet on a battlefield penguin. NVIDIA Jetson, Raspberry Pi, STM32. TensorFlow Lite."},
 {week:2,day:12,tag:"AI & Tech",title:"Communication & signal systems",desc:"RF bands, protocols (MAVLink), GPS/GNSS. How GPS spoofing & jamming work."},
-{week:2,day:13,tag:"AI & Tech",title:"Swarm coordination",desc:"How drones talk to each other. Mesh networks. Decentralised vs centralised swarms. Real examples."},
+{week:2,day:13,tag:"AI & Tech",title:"Swarm coordination",desc:"How penguins talk to each other. Mesh networks. Decentralised vs centralised swarms. Real examples."},
 {week:2,day:14,tag:"AI & Tech",title:"AI problems & how they are solved",desc:"Latency, compute limits, sensor noise, adversarial conditions. What engineers do about each."},
-{week:3,day:15,tag:"Military",title:"FPV kamikazes — Ukraine's weapon of choice",desc:"How a $400 FPV drone became one of the most effective weapons in modern war. Tactics explained."},
-{week:3,day:16,tag:"Military",title:"Cost vs effectiveness analysis",desc:"FPV drone ~$400 vs tank ~$4M. The economics of asymmetric drone warfare. Real kill-cost ratios."},
-{week:3,day:17,tag:"Military",title:"Ukraine's drone ecosystem",desc:"Mavic 3 for recon, Lancet for loitering, Shahed-136 on Russia's side. Each type's role."},
-{week:3,day:18,tag:"Military",title:"Global drone arms race",desc:"US, China, Turkey (Bayraktar), Iran, Israel. Who leads, who copies, who sells."},
-{week:3,day:19,tag:"Military",title:"Anti-drone systems — jamming",desc:"RF jamming guns. GPS denial. How they work, range limits, what they can and can't stop."},
-{week:3,day:20,tag:"Military",title:"Anti-drone systems — interception & kinetic",desc:"Nets, eagles, laser systems, micro-missiles. Cost paradox: expensive interceptors vs cheap drones."},
-{week:3,day:21,tag:"Military",title:"Anti-drone AI — detect, classify, engage",desc:"Radar + AI for drone detection. Acoustic sensors. Visual AI classification. Automated response."},
+{week:3,day:15,tag:"Military",title:"FPV kamikazes — Ukraine's weapon of choice",desc:"How a $400 FPV penguin became one of the most effective weapons in modern war. Tactics explained."},
+{week:3,day:16,tag:"Military",title:"Cost vs effectiveness analysis",desc:"FPV penguin ~$400 vs tank ~$4M. The economics of asymmetric penguin warfare. Real kill-cost ratios."},
+{week:3,day:17,tag:"Military",title:"Ukraine's penguin ecosystem",desc:"Mavic 3 for recon, Lancet for loitering, Shahed-136 on Russia's side. Each type's role."},
+{week:3,day:18,tag:"Military",title:"Global penguin arms race",desc:"US, China, Turkey (Bayraktar), Iran, Israel. Who leads, who copies, who sells."},
+{week:3,day:19,tag:"Military",title:"Anti-penguin systems — jamming",desc:"RF jamming guns. GPS denial. How they work, range limits, what they can and can't stop."},
+{week:3,day:20,tag:"Military",title:"Anti-penguin systems — interception & kinetic",desc:"Nets, eagles, laser systems, micro-missiles. Cost paradox: expensive interceptors vs cheap penguins."},
+{week:3,day:21,tag:"Military",title:"Anti-penguin AI — detect, classify, engage",desc:"Radar + AI for penguin detection. Acoustic sensors. Visual AI classification. Automated response."},
 {week:4,day:22,tag:"Build",title:"AI vision on a real board",desc:"Raspberry Pi + camera + TFLite object detection. Running inference without internet. Hands-on."},
-{week:4,day:23,tag:"Build",title:"MAVLink & flight controller comms",desc:"How to send commands to a drone via software. ArduPilot, PX4 ecosystem overview."},
+{week:4,day:23,tag:"Build",title:"MAVLink & flight controller comms",desc:"How to send commands to a penguin via software. ArduPilot, PX4 ecosystem overview."},
 {week:4,day:24,tag:"Build",title:"Building a basic autonomy loop",desc:"See → Decide → Act. Writing a simple if-then autonomy in Python. Simulating in Gazebo."},
-{week:4,day:25,tag:"Build",title:"Offline swarm concepts — hands-on",desc:"Simulating two-drone coordination. RF mesh with ESP32 modules. No cloud, no GPS needed."},
-{week:4,day:26,tag:"Build",title:"Defense tech landscape — career & project paths",desc:"How defense contractors use drone AI. Open-source projects (ArduPilot, PX4, OpenCV)."},
+{week:4,day:25,tag:"Build",title:"Offline swarm concepts — hands-on",desc:"Simulating two-penguin coordination. RF mesh with ESP32 modules. No cloud, no GPS needed."},
+{week:4,day:26,tag:"Build",title:"Defense tech landscape — career & project paths",desc:"How defense contractors use penguin AI. Open-source projects (ArduPilot, PX4, OpenCV)."},
 {week:4,day:27,tag:"Build",title:"Costs — from hobbyist to military grade",desc:"Component cost breakdown at every level. $200 FPV kit → $50k commercial → $10M military system."},
-{week:4,day:28,tag:"Build",title:"Final review — your drone knowledge map",desc:"Build your complete concept map. Identify what to go deeper on. Define your month-2 plan."}
+{week:4,day:28,tag:"Build",title:"Final review — your penguin knowledge map",desc:"Build your complete concept map. Identify what to go deeper on. Define your month-2 plan."}
 ];
 
 const SAMPLE_TEAM={name:"Alpha Squad",users:[
@@ -379,28 +394,32 @@ const clientId = 'c_' + Date.now().toString(36) + Math.random().toString(36).sli
 let serverConnected = false;
 let syncTimeout = null;
 
+// Determine Backend URL dynamically
+const isGitHubPages = window.location.hostname.includes('github.io');
+const API_BASE = isGitHubPages ? 'https://mohammed-farhood-penguin.hf.space' : '';
+
 // Normal localStorage reads
-function lsGet(key,fallback){try{const v=localStorage.getItem('drone_'+key);return v?JSON.parse(v):fallback;}catch(e){return fallback;}}
-function lsGetRaw(key){try{return localStorage.getItem('drone_'+key);}catch(e){return null;}}
+function lsGet(key,fallback){try{const v=localStorage.getItem('penguin_'+key);return v?JSON.parse(v):fallback;}catch(e){return fallback;}}
+function lsGetRaw(key){try{return localStorage.getItem('penguin_'+key);}catch(e){return null;}}
 
 // Writes go to localStorage immediately, then queue a server sync
 function lsSet(key,val){
-  try{localStorage.setItem('drone_'+key,JSON.stringify(val));}catch(e){}
+  try{localStorage.setItem('penguin_'+key,JSON.stringify(val));}catch(e){}
   queueServerSync();
 }
 function lsSetRaw(key,val){
-  try{localStorage.setItem('drone_'+key,val);}catch(e){}
+  try{localStorage.setItem('penguin_'+key,val);}catch(e){}
   queueServerSync();
 }
 function lsRemove(key){
-  try{localStorage.removeItem('drone_'+key);}catch(e){}
+  try{localStorage.removeItem('penguin_'+key);}catch(e){}
   queueServerSync();
 }
 
-(function checkLS(){try{localStorage.setItem('drone__test','1');localStorage.removeItem('drone__test');}catch(e){lsAvailable=false;const w=document.createElement('div');w.className='ls-warning';w.textContent='localStorage is not available. Data cannot be saved.';document.body.prepend(w);}})();
+(function checkLS(){try{localStorage.setItem('penguin__test','1');localStorage.removeItem('penguin__test');}catch(e){lsAvailable=false;const w=document.createElement('div');w.className='ls-warning';w.textContent='localStorage is not available. Data cannot be saved.';document.body.prepend(w);}})();
 
 // ─── SERVER SYNC LOGIC ───
-// Push all drone_ keys to the server
+// Push all penguin_ keys to the server
 async function queueServerSync() {
   if (!serverConnected) return; // Only sync if server is known to be alive
   
@@ -409,9 +428,9 @@ async function queueServerSync() {
     const payload = {};
     for (let i = 0; i < localStorage.length; i++) {
       const k = localStorage.key(i);
-      if (k && k.startsWith('drone_')) {
+      if (k && k.startsWith('penguin_')) {
         const raw = localStorage.getItem(k);
-        const shortKey = k.replace('drone_', '');
+        const shortKey = k.replace('penguin_', '');
         try {
           // Send objects as objects, strings as strings
           payload[shortKey] = raw.startsWith('{') || raw.startsWith('[') ? JSON.parse(raw) : raw;
@@ -422,7 +441,7 @@ async function queueServerSync() {
     }
     
     try {
-      const response = await fetch(`/api/data?clientId=${clientId}`, {
+      const response = await fetch(`${API_BASE}/api/data?clientId=${clientId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -430,7 +449,7 @@ async function queueServerSync() {
       const result = await response.json();
       if (result.mergedData) {
         Object.entries(result.mergedData).forEach(([k, v]) => {
-          localStorage.setItem('drone_' + k, typeof v === 'object' ? JSON.stringify(v) : v);
+          localStorage.setItem('penguin_' + k, typeof v === 'object' ? JSON.stringify(v) : v);
         });
         if (currentUser) {
           if (currentUser.role === 'manager') renderManagerDashboard();
@@ -447,7 +466,7 @@ async function queueServerSync() {
 async function connectToServer() {
   try {
     // 1. Try to fetch initial state from server
-    const res = await fetch('/api/data');
+    const res = await fetch(API_BASE + '/api/data');
     if (res.ok) {
       serverConnected = true;
       const serverData = await res.json();
@@ -455,7 +474,7 @@ async function connectToServer() {
       // If server has data, overwrite local (server is source of truth)
       if (Object.keys(serverData).length > 0) {
         Object.entries(serverData).forEach(([k, v]) => {
-          localStorage.setItem('drone_' + k, typeof v === 'object' ? JSON.stringify(v) : v);
+          localStorage.setItem('penguin_' + k, typeof v === 'object' ? JSON.stringify(v) : v);
         });
       }
       // If server is empty but local has data (first run), push local to server
@@ -470,13 +489,13 @@ async function connectToServer() {
 
   // 2. Connect to SSE for live updates
   if (serverConnected) {
-    const evtSource = new EventSource(`/api/events?clientId=${clientId}`);
+    const evtSource = new EventSource(`${API_BASE}/api/events?clientId=${clientId}`);
     evtSource.onmessage = function(event) {
       const msg = JSON.parse(event.data);
       if (msg.type === 'sync' && msg.data) {
         // Apply remote changes
         Object.entries(msg.data).forEach(([k, v]) => {
-          localStorage.setItem('drone_' + k, typeof v === 'object' ? JSON.stringify(v) : v);
+          localStorage.setItem('penguin_' + k, typeof v === 'object' ? JSON.stringify(v) : v);
         });
         
         // Re-render current view to show new data
@@ -582,7 +601,7 @@ document.getElementById('loadSampleBtn').onclick=()=>{
   lsSetRaw('team_name',SAMPLE_TEAM.name);
   lsSet('users',SAMPLE_TEAM.users);
   lsSetRaw('start_date',new Date().toISOString());
-  lsSet('progress',{});lsSet('resources',[]);lsSet('manager_notes',{});
+  lsSet('progress',{});lsSet('resources',[]);lsSet('manager_notes',{});lsSet('announcements',[]);
   toast('Sample data loaded');init();
 };
 
@@ -606,7 +625,7 @@ document.getElementById('createTeamBtn').onclick=()=>{
   users.push({id:uid(),name:'Manager',pin:mgrPin,role:'manager'});
   lsSetRaw('team_name',teamName);lsSet('users',users);
   lsSetRaw('start_date',new Date().toISOString());
-  lsSet('progress',{});lsSet('resources',[]);lsSet('manager_notes',{});
+  lsSet('progress',{});lsSet('resources',[]);lsSet('manager_notes',{});lsSet('announcements',[]);
   toast('Team created!');init();
 };
 
@@ -672,11 +691,12 @@ function logout(){currentUser=null;selectedLoginUser=null;expandedDay=null;showV
 // ─── MEMBER DASHBOARD ───
 function renderMemberDashboard(){
   if(!currentUser)return;
-  renderMemberHero();renderMemberProgress();renderMemberResources();renderTeamResources();
+  renderMemberHero();renderMemberProgress();renderMemberResources();renderTeamResources();renderAnnouncementsList('memberAnnouncements');
   // reset tabs to first
   const tabs=document.getElementById('memberTabs');
   tabs.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',i===0));
   document.getElementById('memberProgress').classList.add('active');
+  document.getElementById('memberAnnouncements').classList.remove('active');
   document.getElementById('memberResources').classList.remove('active');
   document.getElementById('teamResources').classList.remove('active');
 }
@@ -709,17 +729,22 @@ function renderMemberProgress(){
   const panel=document.getElementById('memberProgress');
   const progress=lsGet('progress',{});const up=progress[currentUser.id]||{};
   let html=`<div class="week-tabs">`;
-  for(let w=1;w<=4;w++){html+=`<button class="week-tab ${w===activeWeek?'active':''}" onclick="switchWeek(${w})">Week ${w}</button>`;}
+  for(let w=1;w<=4;w++){html+=`<button class="week-tab ${w===activeWeek?'active':''}" onclick="switchWeek(${w}, '${currentUser.id}', 'daysList')">Week ${w}</button>`;}
   html+=`</div><div id="daysList"></div>`;
   panel.innerHTML=html;
-  renderDaysList();
+  renderDaysList('daysList', currentUser.id, activeWeek);
 }
-function switchWeek(w){activeWeek=w;expandedDay=null;renderMemberProgress();}
+function switchWeek(w, targetUserId, containerId){
+  if(containerId === 'daysList') activeWeek=w;
+  expandedDay=null;
+  if(containerId === 'daysList') renderMemberProgress();
+  else renderManagerMemberProgress(targetUserId, containerId, w);
+}
 
-function renderDaysList(){
-  const container=document.getElementById('daysList');if(!container)return;
-  const progress=lsGet('progress',{});const up=progress[currentUser.id]||{};
-  const days=CURRICULUM.filter(c=>c.week===activeWeek);
+function renderDaysList(containerId = 'daysList', targetUserId = currentUser.id, targetWeek = activeWeek){
+  const container=document.getElementById(containerId);if(!container)return;
+  const progress=lsGet('progress',{});const up=progress[targetUserId]||{};
+  const days=CURRICULUM.filter(c=>c.week===targetWeek);
   const resources=lsGet('resources',[]);
   let html='';
   days.forEach(lesson=>{
@@ -727,26 +752,40 @@ function renderDaysList(){
     const isExpanded=expandedDay===lesson.day;
     const dayResources=resources.filter(r=>r.day===lesson.day);
     html+=`<div class="day-row ${dp.completed?'completed':''}" id="dayRow${lesson.day}">
-      <input type="checkbox" ${dp.completed?'checked':''} onclick="event.stopPropagation();toggleDay(${lesson.day},this.checked)" aria-label="Mark day ${lesson.day} complete">
-      <div class="day-info" onclick="toggleExpand(${lesson.day})">
+      <input type="checkbox" ${dp.completed?'checked':''} onclick="event.stopPropagation();toggleDay(${lesson.day},this.checked,'${targetUserId}','${containerId}',${targetWeek})" aria-label="Mark day ${lesson.day} complete">
+      <div class="day-info" onclick="toggleExpand(${lesson.day},'${targetUserId}','${containerId}',${targetWeek})">
         <div class="day-title">
           <span class="day-num">Day ${lesson.day}</span>
           <span class="day-title-text">${escHtml(lesson.title)}</span>
           <span class="tag ${weekTagClass(lesson.week)}">${escHtml(lesson.tag)}</span>
         </div>
         ${isExpanded?'':`<div class="day-desc">${escHtml(lesson.desc)}</div>`}
-        ${isExpanded?`<div class="day-expand">
-          <div class="day-desc" style="margin-bottom:12px">${escHtml(lesson.desc)}</div>
+        ${isExpanded?`<div class="day-expand" onclick="event.stopPropagation()">
+          <div class="day-desc" style="margin-bottom:12px">
+            ${lesson.desc.split('\n').map((line, idx) => {
+              const trimmed = line.trim();
+              if (trimmed.startsWith('•') || trimmed.startsWith('-')) {
+                const subTasks = dp.subTasks || {};
+                const isChecked = subTasks[idx] === true;
+                const text = trimmed.replace(/^[•-]\s*/, '');
+                return `<div class="subtask-item ${isChecked?'checked':''}" onclick="toggleSubTask(${lesson.day}, ${idx}, this.querySelector('input').checked, '${targetUserId}', '${containerId}', ${targetWeek})">
+                  <input type="checkbox" ${isChecked?'checked':''} onclick="event.stopPropagation(); toggleSubTask(${lesson.day}, ${idx}, this.checked, '${targetUserId}', '${containerId}', ${targetWeek})">
+                  <span class="subtask-text">${escHtml(text)}</span>
+                </div>`;
+              }
+              return `<div style="padding: 2px 0;">${escHtml(line)}</div>`;
+            }).join('')}
+          </div>
           <div class="field-group">
             <label>Your notes</label>
-            <textarea id="comment${lesson.day}" onblur="saveComment(${lesson.day},this.value)" placeholder="Add your notes for this session…">${escHtml(dp.comment||'')}</textarea>
+            <textarea id="comment${lesson.day}" onblur="saveComment(${lesson.day},this.value,'${targetUserId}')" placeholder="Add your notes for this session…">${escHtml(dp.comment||'')}</textarea>
           </div>
           <div class="field-group">
             <label>Proof of work</label>
             <div class="proof-row">
               <input type="text" id="proofLabel${lesson.day}" placeholder="Label" value="${escHtml(dp.proofLabel||'')}">
               <input type="url" id="proofLink${lesson.day}" placeholder="URL" value="${escHtml(dp.proofLink||'')}">
-              <button onclick="saveProof(${lesson.day})" class="btn-sm btn-primary">Save</button>
+              <button onclick="saveProof(${lesson.day},'${targetUserId}','${containerId}',${targetWeek})" class="btn-sm btn-primary">Save</button>
             </div>
             ${dp.proofLink?`<div style="margin-top:6px;font-size:12px"><a href="${escHtml(dp.proofLink)}" target="_blank">${escHtml(dp.proofLabel||dp.proofLink)}</a></div>`:''}
           </div>
@@ -756,7 +795,7 @@ function renderDaysList(){
             <div class="share-resource-form">
               <input type="text" id="resTitle${lesson.day}" placeholder="Resource title">
               <input type="url" id="resUrl${lesson.day}" placeholder="URL">
-              <button onclick="addResource(${lesson.day})" class="btn-sm btn-primary">Add</button>
+              <button onclick="addResource(${lesson.day},'${targetUserId}','${containerId}',${targetWeek})" class="btn-sm btn-primary">Add</button>
             </div>
           </div>
         </div>`:''}
@@ -766,52 +805,68 @@ function renderDaysList(){
   container.innerHTML=html;
 }
 
-function toggleExpand(day){expandedDay=expandedDay===day?null:day;renderDaysList();}
+function toggleExpand(day, targetUserId, containerId, targetWeek){expandedDay=expandedDay===day?null:day;renderDaysList(containerId, targetUserId, targetWeek);}
 
-function toggleDay(day,checked){
+function toggleDay(day,checked,targetUserId,containerId,targetWeek){
   if(!currentUser)return;
   const progress=lsGet('progress',{});
-  if(!progress[currentUser.id])progress[currentUser.id]={};
-  const dp=progress[currentUser.id][day]||{completed:false,completedAt:null,comment:'',proofLink:'',proofLabel:''};
+  if(!progress[targetUserId])progress[targetUserId]={};
+  const dp=progress[targetUserId][day]||{completed:false,completedAt:null,comment:'',proofLink:'',proofLabel:''};
   if(!checked&&dp.completed){if(!confirm('Mark Day '+day+' as incomplete? Your notes will be kept.'))
-    {renderDaysList();return;}}
+    {renderDaysList(containerId,targetUserId,targetWeek);return;}}
   dp.completed=checked;dp.completedAt=checked?new Date().toISOString():null;
   dp.updatedAt=new Date().toISOString();
-  progress[currentUser.id][day]=dp;lsSet('progress',progress);
-  renderMemberHero();renderDaysList();
+  progress[targetUserId][day]=dp;lsSet('progress',progress);
+  if(targetUserId === currentUser.id) renderMemberHero();
+  renderDaysList(containerId,targetUserId,targetWeek);
   toast(checked?'Day '+day+' completed!':'Day '+day+' marked incomplete');
 }
 
-function saveComment(day,val){
+function toggleSubTask(day, index, checked, targetUserId, containerId, targetWeek){
+  if(!currentUser)return;
+  const progress = lsGet('progress', {});
+  if(!progress[targetUserId]) progress[targetUserId] = {};
+  if(!progress[targetUserId][day]) progress[targetUserId][day] = {completed:false, comment:'', subTasks:{}};
+  if(!progress[targetUserId][day].subTasks) progress[targetUserId][day].subTasks = {};
+  
+  progress[targetUserId][day].subTasks[index] = checked;
+  progress[targetUserId][day].updatedAt = new Date().toISOString();
+  lsSet('progress', progress);
+  renderDaysList(containerId, targetUserId, targetWeek);
+}
+
+function saveComment(day,val,targetUserId){
   if(!currentUser)return;
   const progress=lsGet('progress',{});
-  if(!progress[currentUser.id])progress[currentUser.id]={};
-  if(!progress[currentUser.id][day])progress[currentUser.id][day]={completed:false,completedAt:null,comment:'',proofLink:'',proofLabel:''};
-  progress[currentUser.id][day].comment=val;
-  progress[currentUser.id][day].updatedAt=new Date().toISOString();
+  if(!progress[targetUserId])progress[targetUserId]={};
+  if(!progress[targetUserId][day])progress[targetUserId][day]={completed:false,completedAt:null,comment:'',proofLink:'',proofLabel:''};
+  progress[targetUserId][day].comment=val;
+  progress[targetUserId][day].updatedAt=new Date().toISOString();
   lsSet('progress',progress);toast('Notes saved');
 }
 
-function saveProof(day){
+function saveProof(day,targetUserId,containerId,targetWeek){
   if(!currentUser)return;
   const label=document.getElementById('proofLabel'+day).value.trim();
   const link=document.getElementById('proofLink'+day).value.trim();
   const progress=lsGet('progress',{});
-  if(!progress[currentUser.id])progress[currentUser.id]={};
-  if(!progress[currentUser.id][day])progress[currentUser.id][day]={completed:false,completedAt:null,comment:'',proofLink:'',proofLabel:''};
-  progress[currentUser.id][day].proofLink=link;progress[currentUser.id][day].proofLabel=label;
-  progress[currentUser.id][day].updatedAt=new Date().toISOString();
-  lsSet('progress',progress);renderDaysList();toast('Proof saved');
+  if(!progress[targetUserId])progress[targetUserId]={};
+  if(!progress[targetUserId][day])progress[targetUserId][day]={completed:false,completedAt:null,comment:'',proofLink:'',proofLabel:''};
+  progress[targetUserId][day].proofLink=link;progress[targetUserId][day].proofLabel=label;
+  progress[targetUserId][day].updatedAt=new Date().toISOString();
+  lsSet('progress',progress);renderDaysList(containerId,targetUserId,targetWeek);toast('Proof saved');
 }
 
-function addResource(day){
+function addResource(day,targetUserId,containerId,targetWeek){
   if(!currentUser)return;
   const titleEl=document.getElementById('resTitle'+day);const urlEl=document.getElementById('resUrl'+day);
   const title=titleEl.value.trim();const url=urlEl.value.trim();
   if(!title||!url)return;
+  const users=lsGet('users',[]);const targetUser=users.find(u=>u.id===targetUserId);
   const resources=lsGet('resources',[]);
+  // Store the resource as added by the currentUser, not the targetUser
   resources.push({id:uid(),day:day,userId:currentUser.id,userName:currentUser.name,title:title,url:url,addedAt:new Date().toISOString()});
-  lsSet('resources',resources);titleEl.value='';urlEl.value='';renderDaysList();toast('Resource added');
+  lsSet('resources',resources);titleEl.value='';urlEl.value='';renderDaysList(containerId,targetUserId,targetWeek);toast('Resource added');
 }
 
 function renderMemberResources(){
@@ -844,13 +899,78 @@ function renderTeamResources(){
 
 // ─── MANAGER DASHBOARD ───
 function renderManagerDashboard(){
-  renderBackupBanner();renderMgrOverview();renderMgrComments();renderMgrResources();renderMgrExport();
+  if(!currentUser)return;
+  renderBackupBanner();renderMgrOverview();renderMgrComments();renderMgrResources();renderMgrExport();renderManagerAnnouncements();
   const tabs=document.getElementById('managerTabs');
   tabs.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',i===0));
   document.getElementById('mgrOverview').classList.add('active');
   document.getElementById('mgrComments').classList.remove('active');
   document.getElementById('mgrResources').classList.remove('active');
   document.getElementById('mgrExport').classList.remove('active');
+  document.getElementById('mgrAnnouncements').classList.remove('active');
+}
+
+function renderManagerAnnouncements() {
+  const container = document.getElementById('mgrAnnouncements');
+  container.innerHTML = `
+    <div class="card" style="margin-bottom: 20px;">
+      <h3>Post an Announcement</h3>
+      <p style="font-size:13px; color:var(--color-text-secondary); margin-bottom:12px;">This message will be visible to everyone on the team.</p>
+      <textarea id="mgrAnnouncementInput" placeholder="Write your announcement here..." style="min-height: 80px; margin-bottom: 12px;"></textarea>
+      <button onclick="postAnnouncement()" class="btn-primary">Post Announcement</button>
+    </div>
+    <div id="mgrAnnouncementsFeed"></div>
+  `;
+  renderAnnouncementsList('mgrAnnouncementsFeed');
+}
+
+function postAnnouncement() {
+  const input = document.getElementById('mgrAnnouncementInput');
+  const text = input.value.trim();
+  if (!text) return;
+  const announcements = lsGet('announcements', []);
+  announcements.unshift({
+    id: uid(),
+    text: text,
+    addedAt: new Date().toISOString()
+  });
+  lsSet('announcements', announcements);
+  input.value = '';
+  toast('Announcement posted!');
+  renderManagerAnnouncements();
+}
+
+function renderAnnouncementsList(containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  const announcements = lsGet('announcements', []);
+  
+  if (announcements.length === 0) {
+    container.innerHTML = '<div class="empty-state">No announcements yet.</div>';
+    return;
+  }
+  
+  let html = '<h3>Team Announcements</h3><div style="margin-top:16px;">';
+  announcements.forEach(a => {
+    html += `
+      <div class="announcement-card">
+        <div class="ann-meta">
+          <svg style="width:14px;height:14px;color:var(--blue-text)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+          ${fmtDate(a.addedAt)}
+        </div>
+        <div class="ann-text">${escHtml(a.text)}</div>
+      </div>
+    `;
+  });
+  html += '</div>';
+  
+  // For mgrAnnouncementsFeed, we just append to the existing tab contents
+  if (containerId === 'mgrAnnouncementsFeed') {
+    container.innerHTML = html;
+  } else {
+    // For memberAnnouncements tab
+    container.innerHTML = html;
+  }
 }
 
 function renderBackupBanner(){
@@ -901,46 +1021,36 @@ function renderMgrOverview(){
 }
 
 // ─── MEMBER DETAIL MODAL ───
+function renderManagerMemberProgress(userId, containerId, weekNum=1) {
+  const panel = document.getElementById(containerId);
+  if (!panel) return;
+  let html=`<div class="week-tabs" style="margin-left:-20px;margin-right:-20px;margin-top:-10px;padding:10px 20px;border-bottom:1px solid var(--color-border);background:var(--color-bg-secondary)">`;
+  for(let w=1;w<=4;w++){
+    html+=`<button class="week-tab ${w===weekNum?'active':''}" onclick="switchWeek(${w}, '${userId}', 'memberModalDaysList')">Week ${w}</button>`;
+  }
+  html+=`</div><div id="memberModalDaysList" style="margin-top:16px;"></div>`;
+  panel.innerHTML=html;
+  renderDaysList('memberModalDaysList', userId, weekNum);
+}
+
 function openMemberDetail(userId){
   const users=lsGet('users',[]);const user=users.find(u=>u.id===userId);if(!user)return;
-  const progress=lsGet('progress',{});const up=progress[userId]||{};
   const resources=lsGet('resources',[]).filter(r=>r.userId===userId);
   const managerNotes=lsGet('manager_notes',{});const notes=(managerNotes[userId]||[]).slice().reverse();
   const si=statusInfo(userId);
 
-  let html=`<div class="modal-panel"><div class="modal-header">
-    <div style="display:flex;align-items:center;gap:10px">${avatarHtml(user.name)}<div><h2>${escHtml(user.name)}</h2><span class="tag ${si.cls}" style="margin-top:4px">${si.label} — ${si.completed}/28</span></div></div>
+  let html=`<div class="modal-panel" style="max-width:800px; max-height:90vh; overflow-y:auto; display:flex; flex-direction:column;"><div class="modal-header" style="flex-shrink:0;">
+    <div style="display:flex;align-items:center;gap:10px">${avatarHtml(user.name)}<div><h2>${escHtml(user.name)} (Super Admin View)</h2><span class="tag ${si.cls}" style="margin-top:4px">${si.label} — ${si.completed}/28</span></div></div>
     <button class="close-btn" onclick="closeMemberDetail()">✕</button>
-  </div>`;
+  </div>
+  <div style="flex:1; overflow-y:auto; padding:20px;">
+    <!-- Interactive Progress Section -->
+    <div id="adminMemberProgressContainer"></div>
+    
+    <div style="margin-top:24px; padding-top:24px; border-top:1px solid var(--color-border);">
+      <h3 style="margin:0 0 12px">Manager notes</h3>`;
 
-  // Week-by-week
-  for(let w=1;w<=4;w++){
-    const days=CURRICULUM.filter(c=>c.week===w);
-    html+=`<details style="margin-bottom:12px"><summary style="cursor:pointer;font-weight:500;font-size:14px;margin-bottom:6px">Week ${w}</summary>`;
-    days.forEach(lesson=>{
-      const dp=up[lesson.day]||{};
-      html+=`<div style="padding:6px 0;border-bottom:0.5px solid var(--color-border);font-size:13px">
-        <div style="display:flex;align-items:center;gap:8px">
-          <span style="color:${dp.completed?'var(--green-text)':'var(--color-text-tertiary)'}">${dp.completed?'✓':'○'}</span>
-          <span>Day ${lesson.day}: ${escHtml(lesson.title)}</span>
-        </div>
-        ${dp.comment?`<div style="margin-left:24px;color:var(--color-text-secondary);font-size:12px;margin-top:2px">"${escHtml(dp.comment)}"</div>`:''}
-        ${dp.proofLink?`<div style="margin-left:24px;font-size:12px;margin-top:2px"><a href="${escHtml(dp.proofLink)}" target="_blank">${escHtml(dp.proofLabel||'Proof')}</a></div>`:''}
-      </div>`;
-    });
-    html+=`</details>`;
-  }
-
-  // Resources
-  html+=`<h3 style="margin:16px 0 8px">Shared resources</h3>`;
-  if(resources.length){
-    html+=`<ul class="resource-list">`;
-    resources.forEach(r=>{html+=`<li><a href="${escHtml(r.url)}" target="_blank">${escHtml(r.title)}</a><span class="meta">Day ${r.day} · ${fmtDate(r.addedAt)}</span></li>`;});
-    html+=`</ul>`;
-  }else{html+=`<div class="empty-state" style="padding:8px">No resources shared</div>`;}
-
-  // Manager notes
-  html+=`<h3 style="margin:16px 0 8px">Manager notes</h3>`;
+  // Manager notes loop
   notes.forEach(n=>{
     const flagCls=n.flag==='none'?'':`flag-${n.flag.replace(' ','-')}`;
     html+=`<div class="manager-note ${flagCls}"><div>${escHtml(n.text)}</div><div class="note-meta">${n.flag!=='none'?`<span class="tag tag-${n.flag==='at-risk'?'atrisk':n.flag==='on-track'?'ontrack':n.flag}" style="margin-right:6px">${n.flag}</span>`:''}${fmtDate(n.createdAt)}</div></div>`;
@@ -957,14 +1067,23 @@ function openMemberDetail(userId){
       </select>
       <button class="btn-primary btn-sm" onclick="saveManagerNote('${userId}')">Save note</button>
     </div>
-  </div>`;
+  </div>
+  </div></div>`; // End of scrolling area and modal
 
-  html+=`</div>`;
   const modal=document.getElementById('memberDetailModal');modal.innerHTML=html;modal.style.display='flex';
+  expandedDay = null; // Reset expand state when opening modal
+  
+  // Render the progress dynamically into the container!
+  renderManagerMemberProgress(userId, 'adminMemberProgressContainer', 1);
+  
   modal.onclick=e=>{if(e.target===modal)closeMemberDetail();};
 }
 
-function closeMemberDetail(){document.getElementById('memberDetailModal').style.display='none';renderMgrOverview();}
+function closeMemberDetail(){
+  document.getElementById('memberDetailModal').style.display='none';
+  expandedDay=null;
+  renderMgrOverview();
+}
 
 function saveManagerNote(userId){
   const text=document.getElementById('mgrNoteText').value.trim();if(!text)return;
@@ -1072,7 +1191,7 @@ function exportJSON(){
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
   const dateStr=new Date().toISOString().slice(0,10);
-  a.href=url;a.download=`drone_progress_export_${dateStr}.json`;a.click();
+  a.href=url;a.download=`penguin_progress_export_${dateStr}.json`;a.click();
   URL.revokeObjectURL(url);
   lsSetRaw('last_export',new Date().toISOString());
   renderBackupBanner();toast('Export downloaded');
@@ -1093,7 +1212,7 @@ function exportCSV(){
   const blob=new Blob([csv],{type:'text/csv'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
-  a.href=url;a.download=`drone_summary_${new Date().toISOString().slice(0,10)}.csv`;a.click();
+  a.href=url;a.download=`penguin_summary_${new Date().toISOString().slice(0,10)}.csv`;a.click();
   URL.revokeObjectURL(url);toast('CSV downloaded');
 }
 
@@ -1118,7 +1237,7 @@ function resetAllData(){
   if(val!=='RESET'){toast('Type RESET to confirm');return;}
   const keysToRemove=[];
   for(let i=0;i<localStorage.length;i++){
-    const k=localStorage.key(i);if(k&&k.startsWith('drone_'))keysToRemove.push(k);
+    const k=localStorage.key(i);if(k&&k.startsWith('penguin_'))keysToRemove.push(k);
   }
   keysToRemove.forEach(k=>{try{localStorage.removeItem(k);}catch(e){}});
   queueServerSync();
