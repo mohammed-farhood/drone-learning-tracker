@@ -248,8 +248,8 @@ button:hover { background: var(--color-bg-secondary); }
     <div class="logo">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
       Penguin Tracker
-      <div id="cloudStatus" style="margin-left: 10px; display: none;">
-        <span id="cloudStatusIcon" style="color: #ccc; font-size: 10px; cursor: help;" title="Cloud Sync Status">●</span>
+      <div id="cloudStatus" style="margin-left: 10px; display: inline-block;">
+        <span id="cloudStatusIcon" style="color: #ccc; font-size: 14px; cursor: help;" title="Cloud Sync Status">●</span>
       </div>
     </div>
     <div class="user-info" id="navUserInfo"></div>
@@ -1277,8 +1277,8 @@ function resetAllData(){
 
 // ─── INIT ───
 async function init(){
-  const statusEl = document.getElementById('cloudStatusIcon');
-  if (statusEl) statusEl.style.display = isGitHubPages ? 'inline-block' : 'none';
+  const statusContainer = document.getElementById('cloudStatus');
+  if (statusContainer) statusContainer.style.display = isGitHubPages ? 'inline-block' : 'none';
 
   if (!serverConnected) await connectToServer();
   
